@@ -1,36 +1,32 @@
 package dao;
 
-import java.sql.*;
-import java.util.ArrayList;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.ArrayList;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class AddressDao {
+public class AddressDao extends BaseDao {
 
-    // 增加记录
+    // 新增地址
     public int addAddress(Address address) {
         String sql = "INSERT INTO smbms_address(contact, addressDesc, postCode, tel, createdBy, creationDate) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, address.getContact());
-            ps.setString(2, address.getAddressDesc());
-            ps.setString(3, address.getPostCode());
-            ps.setString(4, address.getTel());
-            ps.setLong(5, address.getCreatedBy());
-            ps.setTimestamp(6, new Timestamp(address.getCreationDate().getTime()));
-            return ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
+        return executeUpdate(sql,
+                address.getContact(),
+                address.getAddressDesc(),
+                address.getPostCode(),
+                address.getTel(),
+                address.getCreatedBy(),
+                new Timestamp(address.getCreationDate().getTime())
+        );
     }
 
-    // 查询全部
+    // 查询所有
     public List<Address> getAll() {
         List<Address> list = new ArrayList<>();
         String sql = "SELECT * FROM smbms_address";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+
+        executeQuery(sql, rs -> {
             while (rs.next()) {
                 Address a = new Address();
                 a.setId(rs.getLong("id"));
@@ -42,9 +38,8 @@ public class AddressDao {
                 a.setCreationDate(rs.getTimestamp("creationDate"));
                 list.add(a);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        });
+
         return list;
     }
 }
