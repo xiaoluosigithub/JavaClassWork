@@ -15,7 +15,7 @@ public class DBUtil {
 
     static {
         try {
-            // 1️⃣ 加载 db.properties 文件
+            // 加载 db.properties 文件
             Properties props = new Properties();
             InputStream in = DBUtil.class.getClassLoader().getResourceAsStream("db.properties");
             if (in == null) {
@@ -23,18 +23,18 @@ public class DBUtil {
             }
             props.load(in);
 
-            // 2️⃣ 读取配置
+            // 读取配置
             DRIVER = props.getProperty("jdbc.driver");
             URL = props.getProperty("jdbc.url");
             USER = props.getProperty("jdbc.username");
             PASSWORD = props.getProperty("jdbc.password");
 
-            // 3️⃣ 注册数据库驱动
+            // 注册数据库驱动
             Class.forName(DRIVER);
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("❌ 初始化数据库连接失败：" + e.getMessage());
+            throw new RuntimeException("初始化数据库连接失败：" + e.getMessage());
         }
     }
 
@@ -43,7 +43,7 @@ public class DBUtil {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
-    // 关闭连接（可选）
+    // 关闭连接
     public static void close(Connection conn) {
         if (conn != null) {
             try {
