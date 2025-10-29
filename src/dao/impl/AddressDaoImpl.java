@@ -2,7 +2,7 @@ package dao.impl;
 
 import dao.AddressDao;
 import dao.BaseDao;
-import dao.Address; // 注意这里导入你的实体类
+import dao.Address;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.ArrayList;
