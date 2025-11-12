@@ -3,10 +3,9 @@
   User: lyx
   Date: 2025/10/15
   Time: 11:08
-  To change this template use File | Settings | File Templates.
 --%>
-<%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="java.util.*,java.util.Map" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="java.util.*, dao.Address" %>
 <html>
 <head>
     <title>查询地址</title>
@@ -28,8 +27,7 @@
 </form>
 
 <%
-    ArrayList<HashMap<String, String>> addressList =
-            (ArrayList<HashMap<String, String>>) request.getAttribute("addressList");
+    List<Address> addressList = (List<Address>) request.getAttribute("addressList");
     if (addressList != null && !addressList.isEmpty()) {
 %>
 <table>
@@ -37,15 +35,15 @@
         <th>ID</th><th>联系人</th><th>地址描述</th><th>邮编</th>
         <th>电话</th><th>用户ID</th><th>创建时间</th>
     </tr>
-    <% for (Map<String,String> row : addressList) { %>
+    <% for (Address addr : addressList) { %>
     <tr>
-        <td><%=row.get("id")%></td>
-        <td><%=row.get("contact")%></td>
-        <td><%=row.get("addressDesc")%></td>
-        <td><%=row.get("postCode")%></td>
-        <td><%=row.get("tel")%></td>
-        <td><%=row.get("userId")%></td>
-        <td><%=row.get("creationDate")%></td>
+        <td><%=addr.getId()%></td>
+        <td><%=addr.getContact()%></td>
+        <td><%=addr.getAddressDesc()%></td>
+        <td><%=addr.getPostCode()%></td>
+        <td><%=addr.getTel()%></td>
+        <td><%=addr.getUserId()%></td>
+        <td><%=addr.getCreationDate()%></td>
     </tr>
     <% } %>
 </table>
@@ -54,4 +52,3 @@
 <% } %>
 </body>
 </html>
-
