@@ -7,11 +7,14 @@ import javax.servlet.annotation.WebServlet;
 import java.io.IOException;
 import java.sql.*;
 
-@WebServlet("/register") // ✅ 这一行是关键
+@WebServlet("/register") // 
 public class RegisterServlet extends HttpServlet {
+
+    
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        // 转发是服务器内部跳转，请求/响应对象保持不变，适合展示表单页与错误信息
         req.getRequestDispatcher("/register.jsp").forward(req, resp);
     }
 

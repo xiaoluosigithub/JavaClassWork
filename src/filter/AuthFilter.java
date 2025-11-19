@@ -1,4 +1,4 @@
-package servlet.filter;
+package filter;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -6,8 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 // 创建过滤器
 @WebFilter("/*")
@@ -16,6 +14,8 @@ public class AuthFilter implements Filter {
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
+
+        // 强转ServletRequest和ServletResponse对象
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 

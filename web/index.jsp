@@ -6,6 +6,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="listener.OnlineUserCounter" %>
 <html>
 <head>
     <title>地址管理系统</title>
@@ -19,15 +20,17 @@
     </style>
 </head>
 <body>
-<div class="auth-links">
-    <% String currentUser = (String) session.getAttribute("currentUser"); %>
-    <% if (currentUser == null) { %>
-        <a href="login.jsp">登录</a>
-        <a href="register.jsp">注册</a>
-    <% } else { %>
-        <span>已登录：<%= currentUser %></span>
-    <% } %>
-</div>
+    <div class="auth-links">
+        <% String currentUser = (String) session.getAttribute("currentUser"); %>
+        <% if (currentUser == null) { %>
+            <a href="login.jsp">登录</a>
+            <a href="register.jsp">注册</a>
+        <% } else { %>
+            <span>已登录：<%= currentUser %></span>
+            <a href="logout">退出</a>
+        <% } %>
+        <span>在线用户：<%= OnlineUserCounter.getCount() %></span>
+    </div>
 <h1>🏠 地址管理系统</h1>
 <a href="add_address.jsp">➕ 添加地址</a>
 <a href="query_address.jsp">🔍 查询地址</a>
