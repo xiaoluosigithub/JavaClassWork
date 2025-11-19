@@ -1,4 +1,5 @@
 ### IntelliJ IDEA ###
 out/
 .idea/
+.trae/
 /web/WEB-INF/lib/

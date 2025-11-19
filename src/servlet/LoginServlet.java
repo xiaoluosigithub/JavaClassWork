@@ -29,6 +29,7 @@ public class LoginServlet extends HttpServlet {
             req.getRequestDispatcher("/login.jsp").forward(req, resp);
             return;
         }
+
         // 获取用户信息
         String sql = "SELECT id, userName, userPassword FROM smbms_user WHERE userName = ?";
         // 创建数据库连接
