@@ -13,4 +13,8 @@ public interface AddressService {
 
     // 根据关键字查询
     List<Address> searchAddresses(String keyword);
+
+    int countAddresses(String keyword);
+
+    List<Address> searchAddresses(String keyword, int page, int pageSize);
 }

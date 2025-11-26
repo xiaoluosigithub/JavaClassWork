@@ -29,18 +29,56 @@ public class AddressDaoImpl extends BaseDao implements AddressDao {
 
         executeQuery(sql, rs -> {
             while (rs.next()) {
-                Address a = new Address();
-                a.setId(rs.getLong("id"));
-                a.setContact(rs.getString("contact"));
-                a.setAddressDesc(rs.getString("addressDesc"));
-                a.setPostCode(rs.getString("postCode"));
-                a.setTel(rs.getString("tel"));
-                a.setCreatedBy(rs.getLong("createdBy"));
-                a.setCreationDate(rs.getTimestamp("creationDate"));
-                list.add(a);
+                list.add(map(rs));
             }
         });
 
         return list;
+    }
+
+    @Override
+    public int count(String keyword) {
+        String base = "SELECT COUNT(*) FROM smbms_address";
+        String sql = (keyword == null || keyword.trim().isEmpty())
+                ? base
+                : base + " WHERE contact LIKE ? OR addressDesc LIKE ?";
+        final int[] c = {0};
+        if (sql.equals(base)) {
+            executeQuery(sql, rs -> { if (rs.next()) c[0] = rs.getInt(1); });
+        } else {
+            String k = "%" + keyword + "%";
+            executeQuery(sql, rs -> { if (rs.next()) c[0] = rs.getInt(1); }, k, k);
+        }
+        return c[0];
+    }
+
+    @Override
+    public List<Address> findList(String keyword, int offset, int pageSize) {
+        List<Address> list = new ArrayList<>();
+        String base = "SELECT * FROM smbms_address";
+        String where = (keyword == null || keyword.trim().isEmpty())
+                ? ""
+                : " WHERE contact LIKE ? OR addressDesc LIKE ?";
+        String sql = base + where + " ORDER BY id DESC LIMIT ?, ?";
+        if (where.isEmpty()) {
+            executeQuery(sql, rs -> { while (rs.next()) list.add(map(rs)); }, offset, pageSize);
+        } else {
+            String k = "%" + keyword + "%";
+            executeQuery(sql, rs -> { while (rs.next()) list.add(map(rs)); }, k, k, offset, pageSize);
+        }
+        return list;
+    }
+
+    private Address map(java.sql.ResultSet rs) throws java.sql.SQLException {
+        Address a = new Address();
+        a.setId(rs.getLong("id"));
+        a.setContact(rs.getString("contact"));
+        a.setAddressDesc(rs.getString("addressDesc"));
+        a.setPostCode(rs.getString("postCode"));
+        a.setTel(rs.getString("tel"));
+        a.setCreatedBy(rs.getLong("createdBy"));
+        a.setCreationDate(rs.getTimestamp("creationDate"));
+        a.setUserId(rs.getLong("userId"));
+        return a;
     }
 }

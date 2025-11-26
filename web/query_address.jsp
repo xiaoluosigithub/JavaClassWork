@@ -21,7 +21,9 @@
 </head>
 <body>
 <form action="queryAddress" method="get">
-    <input type="text" name="keyword" placeholder="输入联系人或地址关键字">
+    <input type="text" name="keyword" value="${param.keyword}" placeholder="输入联系人或地址关键字">
+    <input type="hidden" name="page" value="1"/>
+    <input type="hidden" name="pageSize" value="${pageSize==null?5:pageSize}"/>
     <button type="submit">查询</button>
     <a href="index.jsp" style="margin-left:20px;">返回首页</a>
 </form>
@@ -50,5 +52,30 @@
 <% } else if (request.getParameter("keyword") != null) { %>
 <p style="text-align:center;color:red;">未找到匹配的记录。</p>
 <% } %>
+
+<div style="width:90%; margin:10px auto; text-align:center;">
+
+    <a href="queryAddress?keyword=${param.keyword}&page=1&pageSize=${pageSize}">首页</a>
+    <a href="queryAddress?keyword=${param.keyword}&page=${page-1}&pageSize=${pageSize}">上一页</a>
+    <a href="queryAddress?keyword=${param.keyword}&page=${page+1}&pageSize=${pageSize}">下一页</a>
+    <a href="queryAddress?keyword=${param.keyword}&page=${maxPage}&pageSize=${pageSize}">尾页</a>
+    <div style="margin-top:8px;">
+        共 ${total} 条 &nbsp; 共 ${maxPage} 页 &nbsp; 当前第 ${page} 页 &nbsp; 每页 ${pageSize} 条
+    </div>
+
+    <form method="get" action="queryAddress" style="display:inline-block;margin-top:8px;">
+        <input type="hidden" name="keyword" value="${param.keyword}"/>
+        <input type="number" name="page" value="${page}" min="1" style="width:80px;"/>
+        <input type="hidden" name="pageSize" value="${pageSize}"/>
+        <button type="submit">GO</button>
+    </form>
+
+    <form method="get" action="queryAddress" style="display:inline-block;margin-top:8px;">
+        <input type="hidden" name="keyword" value="${param.keyword}"/>
+        <input type="number" name="pageSize" value="${pageSize}" min="1" style="width:80px;"/>
+        <input type="hidden" name="page" value="${page}"/>
+        <button type="submit">设置每页</button>
+    </form>
+</div>
 </body>
 </html>

@@ -63,4 +63,15 @@ public class AddressServiceImpl implements AddressService {
         // 返回匹配结果
         return result;
     }
+
+    @Override
+    public int countAddresses(String keyword) {
+        return addressDao.count(keyword);
+    }
+
+    @Override
+    public List<Address> searchAddresses(String keyword, int page, int pageSize) {
+        int offset = (page - 1) * pageSize;
+        return addressDao.findList(keyword, offset, pageSize);
+    }
 }
