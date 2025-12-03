@@ -69,6 +69,36 @@ public class AddressDaoImpl extends BaseDao implements AddressDao {
         return list;
     }
 
+    @Override
+    public Address getById(long id) {
+        final Address[] res = {null};
+        String sql = "SELECT * FROM smbms_address WHERE id = ?";
+        executeQuery(sql, rs -> { if (rs.next()) res[0] = map(rs); }, id);
+        return res[0];
+    }
+
+    @Override
+    public int update(Address address) {
+        String sql = "UPDATE smbms_address SET contact=?, addressDesc=?, postCode=?, tel=?, userId=?, modifyBy=?, modifyDate=? WHERE id=?";
+        Timestamp ts = address.getModifyDate() == null ? new Timestamp(System.currentTimeMillis()) : new Timestamp(address.getModifyDate().getTime());
+        return executeUpdate(sql,
+                address.getContact(),
+                address.getAddressDesc(),
+                address.getPostCode(),
+                address.getTel(),
+                address.getUserId(),
+                address.getModifyBy(),
+                ts,
+                address.getId()
+        );
+    }
+
+    @Override
+    public int deleteById(long id) {
+        String sql = "DELETE FROM smbms_address WHERE id = ?";
+        return executeUpdate(sql, id);
+    }
+
     private Address map(java.sql.ResultSet rs) throws java.sql.SQLException {
         Address a = new Address();
         a.setId(rs.getLong("id"));

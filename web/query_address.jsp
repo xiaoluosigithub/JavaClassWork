@@ -6,6 +6,7 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.*, dao.Address" %>
+<%@ page import="java.util.Date" %>
 <html>
 <head>
     <title>查询地址</title>
@@ -20,6 +21,9 @@
     </style>
 </head>
 <body>
+<%= new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()) %>
+
+
 <form action="queryAddress" method="get">
     <input type="text" name="keyword" value="${param.keyword}" placeholder="输入联系人或地址关键字">
     <input type="hidden" name="page" value="1"/>
@@ -35,7 +39,7 @@
 <table>
     <tr>
         <th>ID</th><th>联系人</th><th>地址描述</th><th>邮编</th>
-        <th>电话</th><th>用户ID</th><th>创建时间</th>
+        <th>电话</th><th>用户ID</th><th>创建时间</th><th>操作</th>
     </tr>
     <% for (Address addr : addressList) { %>
     <tr>
@@ -46,6 +50,16 @@
         <td><%=addr.getTel()%></td>
         <td><%=addr.getUserId()%></td>
         <td><%=addr.getCreationDate()%></td>
+        <td>
+            <a href="updateAddress?id=<%=addr.getId()%>&keyword=${param.keyword}&page=${page}&pageSize=${pageSize}" style="padding:6px 10px;background:#28a745;color:#fff;border-radius:4px;text-decoration:none;margin-right:6px;">改</a>
+            <form action="deleteAddress" method="post" style="display:inline;" onsubmit="return confirm('确认删除该地址吗？');">
+                <input type="hidden" name="id" value="<%=addr.getId()%>"/>
+                <input type="hidden" name="keyword" value="${param.keyword}"/>
+                <input type="hidden" name="page" value="${page}"/>
+                <input type="hidden" name="pageSize" value="${pageSize}"/>
+                <button type="submit" style="padding:6px 10px;background:#dc3545;color:#fff;border:none;border-radius:4px;cursor:pointer;">删</button>
+            </form>
+        </td>
     </tr>
     <% } %>
 </table>

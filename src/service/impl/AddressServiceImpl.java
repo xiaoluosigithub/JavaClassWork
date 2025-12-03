@@ -74,4 +74,20 @@ public class AddressServiceImpl implements AddressService {
         int offset = (page - 1) * pageSize;
         return addressDao.findList(keyword, offset, pageSize);
     }
+
+    @Override
+    public Address getById(long id) {
+        return addressDao.getById(id);
+    }
+
+    @Override
+    public boolean update(Address address) {
+        if (address == null || address.getId() == null) return false;
+        return addressDao.update(address) > 0;
+    }
+
+    @Override
+    public boolean deleteById(long id) {
+        return addressDao.deleteById(id) > 0;
+    }
 }

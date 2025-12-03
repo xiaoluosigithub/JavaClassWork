@@ -7,4 +7,7 @@ public interface AddressDao {
     List<Address> getAll();
     int count(String keyword);
     List<Address> findList(String keyword, int offset, int pageSize);
+    Address getById(long id);
+    int update(Address address);
+    int deleteById(long id);
 }
