@@ -73,3 +73,16 @@
     - Servlet 中对空字符串默认处理，避免 `NumberFormatException`：`e:\JavaWeb\demo01\src\servlet\QueryAddressServlet.java:31-35`
 - 在线用户计数
     - 监听 `Session` 属性增删与会话销毁实现 ++/--，并提供 `getCount()` 供 JSP 显示 `e:\JavaWeb\demo01\src\listener\OnlineUserCounter.java:1-49`
+
+**界面预览**
+
+- 首页
+  ![首页](images/index.png)
+- 登录
+  ![登录](images/login.png)
+- 注册
+  ![注册](images/register.png)
+- 新增地址
+  ![新增地址](images/add_address.png)
+- 查询/修改/删除地址
+  ![查询/修改/删除地址](images/select_update_delete_address.png)
