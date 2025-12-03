@@ -6,24 +6,27 @@
     - `web/register.jsp` 注册
     - `web/add_address.jsp` 新增地址
     - `web/query_address.jsp` 查询地址（支持分页：首页/上一页/下一页/尾页、页大小、跳页）
+    - `web/edit_address.jsp` 编辑地址（从“改”按钮进入，表单回填）
 - 控制层（Servlet）
     - 登录：`servlet.LoginServlet` 处理登录 
     - 注册：`servlet.RegisterServlet` 处理注册
     - 退出登录：`servlet.LogoutServlet` 处理退出登录
     - 新增地址：`servlet.AddAddressServlet` 处理表单提交
     - 查询地址：`servlet.QueryAddressServlet` 处理查询、分页参数解析与转发 
+    - 编辑地址：`servlet.UpdateAddressServlet` 加载编辑页与提交更新
+    - 删除地址：`servlet.DeleteAddressServlet` 处理删除并重定向
 - 过滤器（filter）
     - `filter.AuthFilter` 登录拦截
         - 放行列表：登录/注册页与静态资源；其他路径要求已登录
 - 监听器（listener）
     - `listener.OnlineUserCounter` 会话监听器，统计在线用户，会话属性/销毁时 ++/--
 - 业务层（Service）
-    - 接口: `service.AddressService` 地址服务（新增 `countAddresses` 与分页版 `searchAddresses`）
+    - 接口: `service.AddressService` 地址服务（新增 `countAddresses`、分页版 `searchAddresses`，以及 `getById`、`update`、`deleteById`）
       - 实现 `service.impl.AddressServiceImpl`
 - 数据访问层（DAO）
     - 通用模板：`dao.BaseDao` 提供 `executeUpdate` 与 `executeQuery`
     - 连接工具：`dao.DBUtil` 读取 `db.properties` 并创建连接 
-    - 地址 DAO：接口 `dao.AddressDao` 与实现 `dao.impl.AddressDaoImpl`（新增 `count` 与 `findList` 分页） 
+    - 地址 DAO：接口 `dao.AddressDao` 与实现 `dao.impl.AddressDaoImpl`（新增 `count` 与 `findList` 分页；增加按ID查询 `getById`、更新 `update`、删除 `deleteById`） 
     - 实体：`dao.Address` 实体类 
 
 **核心流程**
@@ -43,6 +46,14 @@
 - 地址查询
     - `GET /queryAddress?keyword=...&page=...&pageSize=...` → Servlet 解析分页参数并做默认值 → Service 计算偏移量 → DAO 使用 `COUNT` 与 `LIMIT 偏移量, 固定条数` 查询 → 结果与分页信息放入 `request` → 转发到 JSP
     - 代码参考：`e:\JavaWeb\demo01\src\servlet\QueryAddressServlet.java:29-48`、`e:\JavaWeb\demo01\src\service\impl\AddressServiceImpl.java:67-76`、`e:\JavaWeb\demo01\src\dao\impl\AddressDaoImpl.java:47-81`
+    
+ - 地址修改
+    - 列表页点击“改”进入 `GET /updateAddress?id=...` → 加载并回填到 `edit_address.jsp` → 在编辑页提交到 `POST /updateAddress`
+    - 代码参考：`e:\JavaWeb\demo01\src\servlet\UpdateAddressServlet.java:19-35`（GET 加载）、`e:\JavaWeb\demo01\src\servlet\UpdateAddressServlet.java:38-67`（POST 更新）；Service `e:\JavaWeb\demo01\src\service\impl\AddressServiceImpl.java:79-87`；DAO `e:\JavaWeb\demo01\src\dao\impl\AddressDaoImpl.java:72-78,81-94`
+
+ - 地址删除
+    - 列表页“删”按钮以 `POST /deleteAddress` 提交 `id` → 删除后重定向回查询页并保留分页参数
+    - 代码参考：`e:\JavaWeb\demo01\src\servlet\DeleteAddressServlet.java:16-35`；Service `e:\JavaWeb\demo01\src\service\impl\AddressServiceImpl.java:89-92`；DAO `e:\JavaWeb\demo01\src\dao\impl\AddressDaoImpl.java:96-100`
 - 注销与在线人数
     - `GET /logout` → 移除 `currentUser` 并失效会话，监听器触发在线人数 --，首页显示当前在线用户数
     - 代码参考：`e:\JavaWeb\demo01\src\servlet\LogoutServlet.java:9-23`、`e:\JavaWeb\demo01\src\listener\OnlineUserCounter.java:1-49`、`e:\JavaWeb\demo01\web\index.jsp:23-30`
