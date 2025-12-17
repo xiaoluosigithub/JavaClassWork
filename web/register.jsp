@@ -13,16 +13,40 @@
         .error { color: red; text-align: center; }
     </style>
     <script>
-        function validate() {
-            const u = document.forms[0].username.value.trim();
-            const p = document.forms[0].password.value.trim();
-            if (!u || !p) { alert('请输入用户名和密码'); return false; }
-            return true;
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            function show(msg) { alert(msg || ''); }
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const u = form.username.value.trim();
+                const p = form.password.value.trim();
+                if (!u || !p) { show('请输入用户名和密码'); return; }
+                const body = new URLSearchParams({ username: u, password: p });
+                try {
+                    const res = await fetch('register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: body.toString()
+                    });
+                    const data = await res.json();
+                    if (data.success && data.redirect) {
+                        alert(data.message || '注册成功');
+                        window.location.href = data.redirect;
+                    } else {
+                        alert(data.message || '注册失败');
+                    }
+                } catch (err) {
+                    show('请求失败');
+                }
+            });
+        });
     </script>
 </head>
 <body>
-<form action="register" method="post" onsubmit="return validate()">
+<form action="register" method="post">
     <h2>📝 注册</h2>
     <input type="text" name="username" placeholder="用户名" required>
     <input type="password" name="password" placeholder="密码" required>

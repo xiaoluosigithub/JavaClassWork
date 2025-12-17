@@ -9,6 +9,24 @@ import java.sql.*;
 
 @WebServlet("/register") // 
 public class RegisterServlet extends HttpServlet {
+    private boolean isAjax(HttpServletRequest req) {
+        String h = req.getHeader("X-Requested-With");
+        String p = req.getParameter("ajax");
+        return (h != null && h.equalsIgnoreCase("XMLHttpRequest")) || (p != null && p.equalsIgnoreCase("true"));
+    }
+
+    private void writeJson(HttpServletResponse resp, boolean success, String message, String redirect) throws IOException {
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("application/json;charset=UTF-8");
+        String r = redirect == null ? "" : redirect;
+        String m = message == null ? "" : message.replace("\\", "\\\\").replace("\"", "\\\"");
+        String json = "{" +
+                "\"success\":" + (success ? "true" : "false") + "," +
+                "\"message\":\"" + m + "\"," +
+                "\"redirect\":\"" + r + "\"" +
+                "}";
+        resp.getWriter().write(json);
+    }
 
     
     @Override
@@ -27,8 +45,12 @@ public class RegisterServlet extends HttpServlet {
 
         if (username == null || username.trim().isEmpty() ||
                 password == null || password.trim().isEmpty()) {
-            req.setAttribute("error", "用户名或密码不能为空");
-            req.getRequestDispatcher("/register.jsp").forward(req, resp);
+            if (isAjax(req)) {
+                writeJson(resp, false, "用户名或密码不能为空", "");
+            } else {
+                req.setAttribute("error", "用户名或密码不能为空");
+                req.getRequestDispatcher("/register.jsp").forward(req, resp);
+            }
             return;
         }
 
@@ -42,8 +64,12 @@ public class RegisterServlet extends HttpServlet {
                 ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        req.setAttribute("error", "用户名已存在");
-                        req.getRequestDispatcher("/register.jsp").forward(req, resp);
+                        if (isAjax(req)) {
+                            writeJson(resp, false, "用户名已存在", "");
+                        } else {
+                            req.setAttribute("error", "用户名已存在");
+                            req.getRequestDispatcher("/register.jsp").forward(req, resp);
+                        }
                         return;
                     }
                 }
@@ -58,17 +84,29 @@ public class RegisterServlet extends HttpServlet {
                 if (rows > 0) {
                     HttpSession session = req.getSession(true);
                     session.setAttribute("currentUser", username);
-                    resp.sendRedirect(req.getContextPath() + "/index.jsp");
+                    if (isAjax(req)) {
+                        writeJson(resp, true, "注册成功", req.getContextPath() + "/index.jsp");
+                    } else {
+                        resp.sendRedirect(req.getContextPath() + "/index.jsp");
+                    }
                 } else {
-                    req.setAttribute("error", "注册失败，请重试");
-                    req.getRequestDispatcher("/register.jsp").forward(req, resp);
+                    if (isAjax(req)) {
+                        writeJson(resp, false, "注册失败，请重试", "");
+                    } else {
+                        req.setAttribute("error", "注册失败，请重试");
+                        req.getRequestDispatcher("/register.jsp").forward(req, resp);
+                    }
                 }
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            req.setAttribute("error", "注册异常：" + e.getMessage());
-            req.getRequestDispatcher("/register.jsp").forward(req, resp);
+            if (isAjax(req)) {
+                writeJson(resp, false, "注册异常：" + e.getMessage(), "");
+            } else {
+                req.setAttribute("error", "注册异常：" + e.getMessage());
+                req.getRequestDispatcher("/register.jsp").forward(req, resp);
+            }
         }
     }
 }
