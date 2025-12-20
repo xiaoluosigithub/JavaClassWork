@@ -1,6 +1,6 @@
 package servlet;
 
-import dao.Address;
+import pojo.Address;
 import service.AddressService;
 import service.impl.AddressServiceImpl;
 

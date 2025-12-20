@@ -1,4 +1,4 @@
-package dao;
+package pojo;
 
 import java.util.Date;
 
@@ -14,7 +14,6 @@ public class Address {
     private Date modifyDate;
     private Long userId;
 
-    // Getter and Setter methods
     public Long getId() {
         return id;
     }

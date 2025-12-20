@@ -1,6 +1,6 @@
 package service.impl;
 
-import dao.Address;
+import pojo.Address;
 import dao.AddressDao;
 import dao.impl.AddressDaoImpl;
 import service.AddressService;

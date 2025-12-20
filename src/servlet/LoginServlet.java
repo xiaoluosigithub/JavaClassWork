@@ -1,11 +1,11 @@
 package servlet;
 
-import dao.DBUtil;
+import service.UserService;
+import service.impl.UserServiceImpl;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.sql.*;
 
 @WebServlet("/login") // ✅ 关键：添加映射
 public class LoginServlet extends HttpServlet {
@@ -30,6 +30,7 @@ public class LoginServlet extends HttpServlet {
                 "}"; // 创建 JSON 字符串
         resp.getWriter().write(json); // 写入 JSON
     }
+    private final UserService userService = new UserServiceImpl();
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -54,51 +55,22 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        // 获取用户信息
-        String sql = "SELECT id, userName, userPassword FROM smbms_user WHERE userName = ?";
-        // 创建数据库连接
-        try (Connection conn = DBUtil.getConnection();
-             // 创建一个 预编译 SQL 语句对象。
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            // 将第一个 参数设置为用户名
-            ps.setString(1, username);
-            // 执行查询 得到 rs 结果集
-            try (ResultSet rs = ps.executeQuery()) {
-                // 数据库中是否存在 匹配的用户名和密码？
-                if (rs.next()) {
-                    // 获取数据库中的密码
-                    String dbPwd = rs.getString("userPassword");
-                    // 判断密码是否匹配
-                    if (password.equals(dbPwd)) {
-                        HttpSession session = req.getSession(true);
-                        // 存储当前用户
-                        session.setAttribute("currentUser", username);
-                        if (isAjax(req)) {
-                            writeJson(resp, true, "登录成功", req.getContextPath() + "/index.jsp");
-                        } else {
-                            resp.sendRedirect(req.getContextPath() + "/index.jsp");
-                        }
-                        return;
-                    }
-                }
-            }
-
+        boolean ok = userService.login(username, password);
+        if (ok) {
+            HttpSession session = req.getSession(true);
+            session.setAttribute("currentUser", username);
             if (isAjax(req)) {
-                writeJson(resp, false, "用户名或密码错误", "");
+                writeJson(resp, true, "登录成功", req.getContextPath() + "/index.jsp");
             } else {
-                req.setAttribute("error", "用户名或密码错误");
-                req.getRequestDispatcher("/login.jsp").forward(req, resp);
+                resp.sendRedirect(req.getContextPath() + "/index.jsp");
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            if (isAjax(req)) {
-                writeJson(resp, false, "登录异常：" + e.getMessage(), "");
-            } else {
-                req.setAttribute("error", "登录异常：" + e.getMessage());
-                req.getRequestDispatcher("/login.jsp").forward(req, resp);
-            }
+            return;
+        }
+        if (isAjax(req)) {
+            writeJson(resp, false, "用户名或密码错误", "");
+        } else {
+            req.setAttribute("error", "用户名或密码错误");
+            req.getRequestDispatcher("/login.jsp").forward(req, resp);
         }
     }
 }

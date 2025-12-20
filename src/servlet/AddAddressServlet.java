@@ -2,7 +2,7 @@
 package servlet;
 
 // 导入所需的类
-import dao.Address;                     // 导入地址数据访问对象
+import pojo.Address;                     // 导入地址数据访问对象
 import service.AddressService;          // 导入地址服务接口
 import service.impl.AddressServiceImpl; // 导入地址服务实现类
 

@@ -5,7 +5,7 @@
   Time: 11:08
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.*, dao.Address" %>
+<%@ page import="java.util.*, pojo.Address" %>
 <%@ page import="java.util.Date" %>
 <html>
 <head>

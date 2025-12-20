@@ -17,7 +17,7 @@ public class DBUtil {
         try {
             // 加载 db.properties 文件
             Properties props = new Properties();
-            InputStream in = DBUtil.class.getClassLoader().getResourceAsStream("db.properties");
+            InputStream in = DBUtil.class.getClassLoader().getResourceAsStream("dao/db.properties");
             if (in == null) {
                 throw new RuntimeException("未找到 db.properties 文件，请确认放在 src 根目录！");
             }

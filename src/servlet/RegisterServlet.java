@@ -1,11 +1,11 @@
 package servlet;
 
-import dao.DBUtil;
+import service.UserService;
+import service.impl.UserServiceImpl;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.WebServlet;
 import java.io.IOException;
-import java.sql.*;
 
 @WebServlet("/register") // 
 public class RegisterServlet extends HttpServlet {
@@ -28,6 +28,7 @@ public class RegisterServlet extends HttpServlet {
         resp.getWriter().write(json);
     }
 
+    private final UserService userService = new UserServiceImpl();
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -54,57 +55,30 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
-        String checkSql = "SELECT id FROM smbms_user WHERE userName = ?";
-        String insertSql = "INSERT INTO smbms_user(userName, userPassword, creationDate) VALUES (?, ?, NOW())";
-
-        try (Connection conn = DBUtil.getConnection()) {
-
-            // 检查是否存在
-            try (PreparedStatement ps = conn.prepareStatement(checkSql)) {
-                ps.setString(1, username);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        if (isAjax(req)) {
-                            writeJson(resp, false, "用户名已存在", "");
-                        } else {
-                            req.setAttribute("error", "用户名已存在");
-                            req.getRequestDispatcher("/register.jsp").forward(req, resp);
-                        }
-                        return;
-                    }
-                }
-            }
-
-            // 插入新用户
-            try (PreparedStatement ps2 = conn.prepareStatement(insertSql)) {
-                ps2.setString(1, username);
-                ps2.setString(2, password);
-                int rows = ps2.executeUpdate();
-
-                if (rows > 0) {
-                    HttpSession session = req.getSession(true);
-                    session.setAttribute("currentUser", username);
-                    if (isAjax(req)) {
-                        writeJson(resp, true, "注册成功", req.getContextPath() + "/index.jsp");
-                    } else {
-                        resp.sendRedirect(req.getContextPath() + "/index.jsp");
-                    }
-                } else {
-                    if (isAjax(req)) {
-                        writeJson(resp, false, "注册失败，请重试", "");
-                    } else {
-                        req.setAttribute("error", "注册失败，请重试");
-                        req.getRequestDispatcher("/register.jsp").forward(req, resp);
-                    }
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (userService.existsByUserName(username)) {
             if (isAjax(req)) {
-                writeJson(resp, false, "注册异常：" + e.getMessage(), "");
+                writeJson(resp, false, "用户名已存在", "");
             } else {
-                req.setAttribute("error", "注册异常：" + e.getMessage());
+                req.setAttribute("error", "用户名已存在");
+                req.getRequestDispatcher("/register.jsp").forward(req, resp);
+            }
+            return;
+        }
+
+        boolean ok = userService.register(username, password);
+        if (ok) {
+            HttpSession session = req.getSession(true);
+            session.setAttribute("currentUser", username);
+            if (isAjax(req)) {
+                writeJson(resp, true, "注册成功", req.getContextPath() + "/index.jsp");
+            } else {
+                resp.sendRedirect(req.getContextPath() + "/index.jsp");
+            }
+        } else {
+            if (isAjax(req)) {
+                writeJson(resp, false, "注册失败，请重试", "");
+            } else {
+                req.setAttribute("error", "注册失败，请重试");
                 req.getRequestDispatcher("/register.jsp").forward(req, resp);
             }
         }

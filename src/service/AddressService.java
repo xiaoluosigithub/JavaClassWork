@@ -1,6 +1,6 @@
 package service;
 
-import dao.Address;
+import pojo.Address;
 import java.util.List;
 
 public interface AddressService {

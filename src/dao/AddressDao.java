@@ -1,5 +1,6 @@
 package dao;
 
+import pojo.Address;
 import java.util.List;
 
 public interface AddressDao {

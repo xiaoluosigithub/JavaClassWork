@@ -2,8 +2,13 @@ package dao.impl;
 
 import dao.AddressDao;
 import dao.BaseDao;
-import dao.Address;
+import dao.DBUtil;
+import pojo.Address;
 import java.sql.Timestamp;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -26,55 +31,82 @@ public class AddressDaoImpl extends BaseDao implements AddressDao {
     public List<Address> getAll() {
         List<Address> list = new ArrayList<>();
         String sql = "SELECT * FROM smbms_address";
-
-        executeQuery(sql, rs -> {
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(map(rs));
             }
-        });
-
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return list;
     }
 
     @Override
     public int count(String keyword) {
         String base = "SELECT COUNT(*) FROM smbms_address";
-        String sql = (keyword == null || keyword.trim().isEmpty())
-                ? base
-                : base + " WHERE contact LIKE ? OR addressDesc LIKE ?";
-        final int[] c = {0};
-        if (sql.equals(base)) {
-            executeQuery(sql, rs -> { if (rs.next()) c[0] = rs.getInt(1); });
-        } else {
-            String k = "%" + keyword + "%";
-            executeQuery(sql, rs -> { if (rs.next()) c[0] = rs.getInt(1); }, k, k);
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        String sql = hasKeyword ? base + " WHERE contact LIKE ? OR addressDesc LIKE ?" : base;
+        int c = 0;
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (hasKeyword) {
+                String k = "%" + keyword + "%";
+                ps.setString(1, k);
+                ps.setString(2, k);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) c = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return c[0];
+        return c;
     }
 
     @Override
     public List<Address> findList(String keyword, int offset, int pageSize) {
         List<Address> list = new ArrayList<>();
         String base = "SELECT * FROM smbms_address";
-        String where = (keyword == null || keyword.trim().isEmpty())
-                ? ""
-                : " WHERE contact LIKE ? OR addressDesc LIKE ?";
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        String where = hasKeyword ? " WHERE contact LIKE ? OR addressDesc LIKE ?" : "";
         String sql = base + where + " ORDER BY id DESC LIMIT ?, ?";
-        if (where.isEmpty()) {
-            executeQuery(sql, rs -> { while (rs.next()) list.add(map(rs)); }, offset, pageSize);
-        } else {
-            String k = "%" + keyword + "%";
-            executeQuery(sql, rs -> { while (rs.next()) list.add(map(rs)); }, k, k, offset, pageSize);
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            int idx = 1;
+            if (hasKeyword) {
+                String k = "%" + keyword + "%";
+                ps.setString(idx++, k);
+                ps.setString(idx++, k);
+            }
+            ps.setInt(idx++, offset);
+            ps.setInt(idx, pageSize);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(map(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return list;
     }
 
     @Override
     public Address getById(long id) {
-        final Address[] res = {null};
         String sql = "SELECT * FROM smbms_address WHERE id = ?";
-        executeQuery(sql, rs -> { if (rs.next()) res[0] = map(rs); }, id);
-        return res[0];
+        Address res = null;
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) res = map(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
     }
 
     @Override
