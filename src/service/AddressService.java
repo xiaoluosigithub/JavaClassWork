@@ -12,11 +12,11 @@ public interface AddressService {
     List<Address> getAllAddresses();
 
     // 根据关键字查询
-    List<Address> searchAddresses(String keyword);
+    // 删除旧的关键字查询接口，仅保留按 id + contact 的组合查询
 
-    int countAddresses(String keyword);
-
-    List<Address> searchAddresses(String keyword, int page, int pageSize);
+    int countAddresses(Long id, String contact);
+    
+    List<Address> searchAddresses(Long id, String contact, int page, int pageSize);
 
     Address getById(long id);
 

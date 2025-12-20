@@ -33,8 +33,7 @@
     </div>
 <h1>🏠 地址管理系统</h1>
 <a href="add_address.jsp">➕ 添加地址</a>
-<a href="query_address.jsp">🔍 查询地址</a>
+<a href="queryAddress?page=1&pageSize=20">🔍 查询地址</a>
 </body>
 </html>
-
 

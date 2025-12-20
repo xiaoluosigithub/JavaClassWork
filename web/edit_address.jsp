@@ -20,11 +20,12 @@
     <input type="text" name="tel" placeholder="电话" value="${address.tel}">
     <input type="text" name="userId" placeholder="用户ID" value="${address.userId}" required>
     <input type="text" name="modifyBy" placeholder="修改者ID" value="${address.modifyBy}">
-    <input type="hidden" name="keyword" value="${keyword}">
+    <input type="hidden" name="contact" value="${contact}">
+    <input type="hidden" name="idParam" value="${id}">
     <input type="hidden" name="page" value="${page}">
     <input type="hidden" name="pageSize" value="${pageSize}">
     <button type="submit">提交</button>
-    <a href="queryAddress?keyword=${keyword}&page=${page}&pageSize=${pageSize}" style="display:block;margin-top:10px;text-align:center;">返回列表</a>
+    <a href="queryAddress?id=${id}&contact=${contact}&page=${page}&pageSize=${pageSize}" style="display:block;margin-top:10px;text-align:center;">返回列表</a>
 </form>
 </body>
 </html>

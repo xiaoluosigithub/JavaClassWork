@@ -42,9 +42,11 @@ public class AddAddressServlet extends HttpServlet {
 
             // 调用业务逻辑执行地址添加操作
             boolean success = addressService.addAddress(address);
-
-            // 向客户端返回操作结果
-            resp.getWriter().println(success ? "✅ 地址添加成功！" : "❌ 地址添加失败！");
+            if (success) {
+                resp.getWriter().println("<script>alert('添加成功');location.href='add_address.jsp';</script>");
+            } else {
+                resp.getWriter().println("<script>alert('添加失败');location.href='add_address.jsp';</script>");
+            }
         } catch (Exception e) {
             // 捕获并打印异常堆栈信息，并向客户端返回错误消息
             e.printStackTrace();

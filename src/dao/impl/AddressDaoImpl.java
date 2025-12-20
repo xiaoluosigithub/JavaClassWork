@@ -30,7 +30,7 @@ public class AddressDaoImpl extends BaseDao implements AddressDao {
     @Override
     public List<Address> getAll() {
         List<Address> list = new ArrayList<>();
-        String sql = "SELECT * FROM smbms_address";
+        String sql = "SELECT * FROM smbms_address ORDER BY id ASC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -43,18 +43,36 @@ public class AddressDaoImpl extends BaseDao implements AddressDao {
         return list;
     }
 
+    
+
     @Override
-    public int count(String keyword) {
+    public int count(Long id, String contact) {
         String base = "SELECT COUNT(*) FROM smbms_address";
-        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
-        String sql = hasKeyword ? base + " WHERE contact LIKE ? OR addressDesc LIKE ?" : base;
+        StringBuilder where = new StringBuilder();
+        boolean hasId = id != null;
+        boolean hasContact = contact != null && !contact.trim().isEmpty();
+        if (hasId || hasContact) {
+            where.append(" WHERE ");
+            boolean first = true;
+            if (hasId) {
+                where.append("id = ?");
+                first = false;
+            }
+            if (hasContact) {
+                if (!first) where.append(" AND ");
+                where.append("contact LIKE ?");
+            }
+        }
+        String sql = base + where.toString();
         int c = 0;
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            if (hasKeyword) {
-                String k = "%" + keyword + "%";
-                ps.setString(1, k);
-                ps.setString(2, k);
+            int idx = 1;
+            if (hasId) {
+                ps.setLong(idx++, id);
+            }
+            if (hasContact) {
+                ps.setString(idx++, "%" + contact.trim() + "%");
             }
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) c = rs.getInt(1);
@@ -66,19 +84,33 @@ public class AddressDaoImpl extends BaseDao implements AddressDao {
     }
 
     @Override
-    public List<Address> findList(String keyword, int offset, int pageSize) {
+    public List<Address> findList(Long id, String contact, int offset, int pageSize) {
         List<Address> list = new ArrayList<>();
         String base = "SELECT * FROM smbms_address";
-        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
-        String where = hasKeyword ? " WHERE contact LIKE ? OR addressDesc LIKE ?" : "";
-        String sql = base + where + " ORDER BY id DESC LIMIT ?, ?";
+        StringBuilder where = new StringBuilder();
+        boolean hasId = id != null;
+        boolean hasContact = contact != null && !contact.trim().isEmpty();
+        if (hasId || hasContact) {
+            where.append(" WHERE ");
+            boolean first = true;
+            if (hasId) {
+                where.append("id = ?");
+                first = false;
+            }
+            if (hasContact) {
+                if (!first) where.append(" AND ");
+                where.append("contact LIKE ?");
+            }
+        }
+        String sql = base + where.toString() + " ORDER BY id ASC LIMIT ?, ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             int idx = 1;
-            if (hasKeyword) {
-                String k = "%" + keyword + "%";
-                ps.setString(idx++, k);
-                ps.setString(idx++, k);
+            if (hasId) {
+                ps.setLong(idx++, id);
+            }
+            if (hasContact) {
+                ps.setString(idx++, "%" + contact.trim() + "%");
             }
             ps.setInt(idx++, offset);
             ps.setInt(idx, pageSize);

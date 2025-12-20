@@ -24,7 +24,8 @@ public class UpdateAddressServlet extends HttpServlet {
             long id = Long.parseLong(idStr);
             Address address = addressService.getById(id);
             req.setAttribute("address", address);
-            req.setAttribute("keyword", req.getParameter("keyword"));
+            req.setAttribute("contact", req.getParameter("contact"));
+            req.setAttribute("id", req.getParameter("idParam"));
             req.setAttribute("page", Integer.parseInt(req.getParameter("page") == null ? "1" : req.getParameter("page")));
             req.setAttribute("pageSize", Integer.parseInt(req.getParameter("pageSize") == null ? "5" : req.getParameter("pageSize")));
             req.getRequestDispatcher("edit_address.jsp").forward(req, resp);
@@ -52,11 +53,8 @@ public class UpdateAddressServlet extends HttpServlet {
             a.setModifyDate(new Date());
 
             boolean ok = addressService.update(a);
-            String keyword = req.getParameter("keyword");
-            String page = req.getParameter("page");
-            String pageSize = req.getParameter("pageSize");
             if (ok) {
-                resp.sendRedirect("queryAddress?keyword=" + (keyword==null?"":keyword) + "&page=" + (page==null?"1":page) + "&pageSize=" + (pageSize==null?"5":pageSize));
+                resp.getWriter().println("<script>alert('修改成功');location.href='queryAddress?page=1&pageSize=20';</script>");
             } else {
                 resp.getWriter().println("❌ 更新失败");
             }

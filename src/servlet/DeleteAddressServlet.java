@@ -20,11 +20,12 @@ public class DeleteAddressServlet extends HttpServlet {
         try {
             long id = Long.parseLong(req.getParameter("id"));
             boolean ok = addressService.deleteById(id);
-            String keyword = req.getParameter("keyword");
+            String contact = req.getParameter("contact");
+            String idParam = req.getParameter("idParam");
             String page = req.getParameter("page");
             String pageSize = req.getParameter("pageSize");
             if (ok) {
-                resp.sendRedirect("queryAddress?keyword=" + (keyword==null?"":keyword) + "&page=" + (page==null?"1":page) + "&pageSize=" + (pageSize==null?"5":pageSize));
+                resp.sendRedirect("queryAddress?id=" + (idParam==null?"":idParam) + "&contact=" + (contact==null?"":contact) + "&page=" + (page==null?"1":page) + "&pageSize=" + (pageSize==null?"5":pageSize));
             } else {
                 resp.getWriter().println("❌ 删除失败");
             }

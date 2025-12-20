@@ -21,13 +21,17 @@
     </style>
 </head>
 <body>
+<% if (request.getAttribute("addressList") == null) { %>
+<script>location.href='queryAddress?page=1&pageSize=20';</script>
+<% } %>
 <%= new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()) %>
 
 
 <form action="queryAddress" method="get">
-    <input type="text" name="keyword" value="${param.keyword}" placeholder="输入联系人或地址关键字">
+    <input type="number" name="id" value="${param.id}" placeholder="输入ID">
+    <input type="text" name="contact" value="${param.contact}" placeholder="输入联系人（支持模糊）">
     <input type="hidden" name="page" value="1"/>
-    <input type="hidden" name="pageSize" value="${pageSize==null?5:pageSize}"/>
+    <input type="hidden" name="pageSize" value="${pageSize==null?20:pageSize}"/>
     <button type="submit">查询</button>
     <a href="index.jsp" style="margin-left:20px;">返回首页</a>
 </form>
@@ -51,10 +55,11 @@
         <td><%=addr.getUserId()%></td>
         <td><%=addr.getCreationDate()%></td>
         <td>
-            <a href="updateAddress?id=<%=addr.getId()%>&keyword=${param.keyword}&page=${page}&pageSize=${pageSize}" style="padding:6px 10px;background:#28a745;color:#fff;border-radius:4px;text-decoration:none;margin-right:6px;">改</a>
+            <a href="updateAddress?id=<%=addr.getId()%>&contact=${param.contact}&idParam=${param.id}&page=${page}&pageSize=${pageSize}" style="padding:6px 10px;background:#28a745;color:#fff;border-radius:4px;text-decoration:none;margin-right:6px;">改</a>
             <form action="deleteAddress" method="post" style="display:inline;" onsubmit="return confirm('确认删除该地址吗？');">
                 <input type="hidden" name="id" value="<%=addr.getId()%>"/>
-                <input type="hidden" name="keyword" value="${param.keyword}"/>
+                <input type="hidden" name="contact" value="${param.contact}"/>
+                <input type="hidden" name="idParam" value="${param.id}"/>
                 <input type="hidden" name="page" value="${page}"/>
                 <input type="hidden" name="pageSize" value="${pageSize}"/>
                 <button type="submit" style="padding:6px 10px;background:#dc3545;color:#fff;border:none;border-radius:4px;cursor:pointer;">删</button>
@@ -63,29 +68,31 @@
     </tr>
     <% } %>
 </table>
-<% } else if (request.getParameter("keyword") != null) { %>
+<% } else if (request.getParameter("id") != null || request.getParameter("contact") != null) { %>
 <p style="text-align:center;color:red;">未找到匹配的记录。</p>
 <% } %>
 
 <div style="width:90%; margin:10px auto; text-align:center;">
 
-    <a href="queryAddress?keyword=${param.keyword}&page=1&pageSize=${pageSize}">首页</a>
-    <a href="queryAddress?keyword=${param.keyword}&page=${page-1}&pageSize=${pageSize}">上一页</a>
-    <a href="queryAddress?keyword=${param.keyword}&page=${page+1}&pageSize=${pageSize}">下一页</a>
-    <a href="queryAddress?keyword=${param.keyword}&page=${maxPage}&pageSize=${pageSize}">尾页</a>
+    <a href="queryAddress?id=${param.id}&contact=${param.contact}&page=1&pageSize=${pageSize}">首页</a>
+    <a href="queryAddress?id=${param.id}&contact=${param.contact}&page=${page-1}&pageSize=${pageSize}">上一页</a>
+    <a href="queryAddress?id=${param.id}&contact=${param.contact}&page=${page+1}&pageSize=${pageSize}">下一页</a>
+    <a href="queryAddress?id=${param.id}&contact=${param.contact}&page=${maxPage}&pageSize=${pageSize}">尾页</a>
     <div style="margin-top:8px;">
         共 ${total} 条 &nbsp; 共 ${maxPage} 页 &nbsp; 当前第 ${page} 页 &nbsp; 每页 ${pageSize} 条
     </div>
 
     <form method="get" action="queryAddress" style="display:inline-block;margin-top:8px;">
-        <input type="hidden" name="keyword" value="${param.keyword}"/>
+        <input type="hidden" name="id" value="${param.id}"/>
+        <input type="hidden" name="contact" value="${param.contact}"/>
         <input type="number" name="page" value="${page}" min="1" style="width:80px;"/>
         <input type="hidden" name="pageSize" value="${pageSize}"/>
         <button type="submit">GO</button>
     </form>
 
     <form method="get" action="queryAddress" style="display:inline-block;margin-top:8px;">
-        <input type="hidden" name="keyword" value="${param.keyword}"/>
+        <input type="hidden" name="id" value="${param.id}"/>
+        <input type="hidden" name="contact" value="${param.contact}"/>
         <input type="number" name="pageSize" value="${pageSize}" min="1" style="width:80px;"/>
         <input type="hidden" name="page" value="${page}"/>
         <button type="submit">设置每页</button>

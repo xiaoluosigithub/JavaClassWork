@@ -5,7 +5,6 @@ import dao.AddressDao;
 import dao.impl.AddressDaoImpl;
 import service.AddressService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 // 地址业务逻辑实现类（调用 DAO 层执行数据库操作）
@@ -36,43 +35,18 @@ public class AddressServiceImpl implements AddressService {
         return addressDao.getAll();
     }
 
-    // 搜索地址信息
+
+
     @Override
-    public List<Address> searchAddresses(String keyword) {
-        // 如果关键字为空或全是空格，则返回所有地址
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return getAllAddresses();
-        }
-
-        // 结果列表
-        List<Address> result = new ArrayList<Address>();
-
-        // 获取所有地址
-        List<Address> all = getAllAddresses();
-
-        // 遍历每个地址，判断联系人或地址描述是否包含关键字
-        for (int i = 0; i < all.size(); i++) {
-            Address a = all.get(i);
-            if ((a.getContact() != null && a.getContact().indexOf(keyword) >= 0) ||
-                    (a.getAddressDesc() != null && a.getAddressDesc().indexOf(keyword) >= 0)) {
-                // 如果匹配，则加入结果列表
-                result.add(a);
-            }
-        }
-
-        // 返回匹配结果
-        return result;
+    public int countAddresses(Long id, String contact) {
+        return addressDao.count(id, contact);
     }
 
-    @Override
-    public int countAddresses(String keyword) {
-        return addressDao.count(keyword);
-    }
 
     @Override
-    public List<Address> searchAddresses(String keyword, int page, int pageSize) {
+    public List<Address> searchAddresses(Long id, String contact, int page, int pageSize) {
         int offset = (page - 1) * pageSize;
-        return addressDao.findList(keyword, offset, pageSize);
+        return addressDao.findList(id, contact, offset, pageSize);
     }
 
     @Override

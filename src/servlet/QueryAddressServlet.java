@@ -28,7 +28,16 @@ public class QueryAddressServlet extends HttpServlet {
 
         try {
             // 获取请求参数
-            String keyword = req.getParameter("keyword");
+            String idStr = req.getParameter("id");
+            String contact = req.getParameter("contact");
+            Long id = null;
+            if (idStr != null && !idStr.trim().isEmpty()) {
+                try {
+                    id = Long.parseLong(idStr.trim());
+                } catch (NumberFormatException ignored) {
+                    id = null;
+                }
+            }
             // 获取分页参数
             String pStr = req.getParameter("page");
             // 获取每页记录数
@@ -36,20 +45,21 @@ public class QueryAddressServlet extends HttpServlet {
             // 获取当前页码
             int page = (pStr == null || pStr.isEmpty()) ? 1 : Integer.parseInt(pStr);
             // 获取每页记录数
-            int pageSize = (psStr == null || psStr.isEmpty()) ? 5 : Integer.parseInt(psStr);
+            int pageSize = (psStr == null || psStr.isEmpty()) ? 20 : Integer.parseInt(psStr);
             // 获取总记录数
-            int total = addressService.countAddresses(keyword);
+            int total = addressService.countAddresses(id, contact);
             // 计算最大页数
             int maxPage = total % pageSize == 0 ? total / pageSize : total / pageSize + 1;
             // 校验页码
             if (page < 1) page = 1;
             if (maxPage > 0 && page > maxPage) page = maxPage;
             // 查询
-            List<Address> list = addressService.searchAddresses(keyword, page, pageSize);
+            List<Address> list = addressService.searchAddresses(id, contact, page, pageSize);
 
             // 设置数据
             req.setAttribute("addressList", list);
-            req.setAttribute("keyword", keyword);
+            req.setAttribute("id", idStr);
+            req.setAttribute("contact", contact);
             req.setAttribute("page", page);
             req.setAttribute("pageSize", pageSize);
             req.setAttribute("total", total);
