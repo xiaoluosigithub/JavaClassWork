@@ -35,31 +35,33 @@ public class AddressServiceImpl implements AddressService {
         return addressDao.getAll();
     }
 
-
-
+    // 统计符合条件的地址数量
     @Override
     public int countAddresses(Long id, String contact) {
         return addressDao.count(id, contact);
     }
 
-
+    // 根据用户 ID 和联系人姓名分页查询地址列表
     @Override
     public List<Address> searchAddresses(Long id, String contact, int page, int pageSize) {
         int offset = (page - 1) * pageSize;
         return addressDao.findList(id, contact, offset, pageSize);
     }
 
+    // 根据 ID 查询地址详情 
     @Override
     public Address getById(long id) {
         return addressDao.getById(id);
     }
 
+    // 更新地址信息 
     @Override
     public boolean update(Address address) {
         if (address == null || address.getId() == null) return false;
         return addressDao.update(address) > 0;
     }
 
+    // 根据 ID 删除地址 
     @Override
     public boolean deleteById(long id) {
         return addressDao.deleteById(id) > 0;
