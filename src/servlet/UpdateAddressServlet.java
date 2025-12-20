@@ -10,15 +10,18 @@ import javax.servlet.annotation.WebServlet;
 import java.io.IOException;
 import java.util.Date;
 
+// 更新地址信息
 @WebServlet("/updateAddress")
 public class UpdateAddressServlet extends HttpServlet {
-
+    // 通过业务层处理逻辑，实例化地址服务实现类
     private final AddressService addressService = new AddressServiceImpl();
-
+    // 处理 JSON 响应，包含成功状态、消息和可选重定向路径
     private void writeJson(HttpServletResponse resp, boolean success, String message, String redirect) throws IOException {
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json;charset=UTF-8");
+        // 构建 JSON 字符串，包含成功状态、消息和可选重定向路径
         String r = redirect == null ? "" : redirect;
+        // 对消息中的特殊字符进行转义，防止 JSON 解析错误
         String m = message == null ? "" : message.replace("\\", "\\\\").replace("\"", "\\\"");
         String json = "{" +
                 "\"success\":" + (success ? "true" : "false") + "," +
@@ -28,14 +31,15 @@ public class UpdateAddressServlet extends HttpServlet {
         resp.getWriter().write(json);
     }
 
+    // 处理 GET 请求，根据 ID 查询地址详情并转发到编辑页面
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
         resp.setContentType("text/html;charset=UTF-8");
         try {
-            String idStr = req.getParameter("id");
-            long id = Long.parseLong(idStr);
-            Address address = addressService.getById(id);
+            String idStr = req.getParameter("id"); // 从请求参数中获取 ID 字符串
+            long id = Long.parseLong(idStr); // 将 ID 字符串转换为长整型
+            Address address = addressService.getById(id); // 根据 ID 查询地址详情
             req.setAttribute("address", address);
             req.setAttribute("contactFilter", req.getParameter("contact"));
             req.setAttribute("id", req.getParameter("idParam"));
@@ -47,7 +51,8 @@ public class UpdateAddressServlet extends HttpServlet {
             resp.getWriter().println("❌ 加载编辑页失败：" + e.getMessage());
         }
     }
-
+    
+    // 处理 POST 请求，根据 ID 更新地址信息
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");

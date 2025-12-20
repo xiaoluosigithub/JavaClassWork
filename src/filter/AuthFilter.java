@@ -36,6 +36,7 @@ public class AuthFilter implements Filter {
         // 检查用户是否已登录
         HttpSession session = request.getSession();
         if (session.getAttribute("currentUser") == null) {
+            // 未登录用户，判断请求是否为页面请求
             boolean isPage = uri.endsWith(".jsp") || uri.equals(request.getContextPath() + "/") || uri.endsWith(".css") || uri.endsWith(".js");
             if (isPage) {
                 response.sendRedirect(request.getContextPath() + "/login.jsp");
