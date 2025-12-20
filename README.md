@@ -1,78 +1,103 @@
+**项目说明**
+
+- 概览：本项目采用 JSP 前端 + Servlet 后端，所有业务请求统一走 AJAX，后端统一返回 JSON。未登录时，API 返回 JSON（含 `redirect` 登录页）；页面类资源（JSP）仍重定向到登录页。
+- 页面入口：`web/index.jsp`；其“查询地址”链接指向 `web/query_address.jsp`，该页用脚本发起查询、分页与删除请求。
+- 统一响应格式：`{"success":true|false,"message":"...","redirect":"..."}`
+
 **项目结构**
 
 - 表现层（JSP）
-    - `web/index.jsp` 入口，含登录/注册、显示在线人数与退出链接
-    - `web/login.jsp` 登录
-    - `web/register.jsp` 注册
-    - `web/add_address.jsp` 新增地址
-    - `web/query_address.jsp` 查询地址（支持分页：首页/上一页/下一页/尾页、页大小、跳页）
-    - `web/edit_address.jsp` 编辑地址（从“改”按钮进入，表单回填）
+  - `web/index.jsp` 首页，显示在线人数、登录/注册/退出；退出使用 AJAX 并按 JSON 的 `redirect` 跳转
+  - `web/login.jsp` 登录表单，使用 `fetch('login', POST)` 并解析 JSON
+  - `web/register.jsp` 注册表单，使用 `fetch('register', POST)` 并解析 JSON
+  - `web/add_address.jsp` 新增地址，使用 `fetch('addAddress', POST)` 并解析 JSON
+  - `web/query_address.jsp` 查询地址，所有查询、分页与删除操作均为 AJAX；首次加载自动发起查询
+  - `web/edit_address.jsp` 编辑地址，GET 加载并回填；POST 提交更新为 AJAX
 - 控制层（Servlet）
-    - 登录：`servlet.LoginServlet` 处理登录 
-    - 注册：`servlet.RegisterServlet` 处理注册
-    - 退出登录：`servlet.LogoutServlet` 处理退出登录
-    - 新增地址：`servlet.AddAddressServlet` 处理表单提交
-    - 查询地址：`servlet.QueryAddressServlet` 处理查询、分页参数解析与转发 
-    - 编辑地址：`servlet.UpdateAddressServlet` 加载编辑页与提交更新
-    - 删除地址：`servlet.DeleteAddressServlet` 处理删除并重定向
-- 过滤器（filter）
-    - `filter.AuthFilter` 登录拦截
-        - 放行列表：登录/注册页与静态资源；其他路径要求已登录
-- 监听器（listener）
-    - `listener.OnlineUserCounter` 会话监听器，统计在线用户，会话属性/销毁时 ++/--
+  - 登录：`src/servlet/LoginServlet.java`（`/login`）
+  - 注册：`src/servlet/RegisterServlet.java`（`/register`）
+  - 注销：`src/servlet/LogoutServlet.java`（`/logout`）
+  - 新增地址：`src/servlet/AddAddressServlet.java`（`/addAddress`）
+  - 查询地址：`src/servlet/QueryAddressServlet.java`（`/queryAddress`）
+  - 编辑地址：`src/servlet/UpdateAddressServlet.java`（`/updateAddress`）
+  - 删除地址：`src/servlet/DeleteAddressServlet.java`（`/deleteAddress`）
+- 过滤器
+  - `src/filter/AuthFilter.java` 登录拦截；页面资源未登录时重定向到登录页，API 请求未登录时返回 JSON
+- 监听器
+  - `src/listener/OnlineUserCounter.java` 简化为 `int` 计数，监听会话属性增删与会话销毁
 - 业务层（Service）
-    - 接口: `service.AddressService` 地址服务（新增 `countAddresses`、分页版 `searchAddresses`，以及 `getById`、`update`、`deleteById`）
-      - 实现 `service.impl.AddressServiceImpl`
+  - `src/service/AddressService.java`、`src/service/impl/AddressServiceImpl.java`
 - 数据访问层（DAO）
-    - 通用模板：`dao.BaseDao` 提供 `executeUpdate` 与 `executeQuery`
-    - 连接工具：`dao.DBUtil` 读取 `db.properties` 并创建连接 
-    - 地址 DAO：接口 `dao.AddressDao` 与实现 `dao.impl.AddressDaoImpl`（新增 `count` 与 `findList` 分页；增加按ID查询 `getById`、更新 `update`、删除 `deleteById`） 
-    - 实体：`dao.Address` 实体类 
+  - 接口与实现：`src/dao/AddressDao.java`、`src/dao/impl/AddressDaoImpl.java`
+  - 公共封装：`src/dao/BaseDao.java`、`src/dao/DBUtil.java`
+- 配置
+  - `web/WEB-INF/web.xml` 设置欢迎页为 `index.jsp`
+  - 依赖 Jar 位于 `web/WEB-INF/lib/`
 
-**核心流程**
+**接口约定**
 
-- 登录
-    - 表单提交到 `POST /login` → 查 `smbms_user` 比对明文密码 → 成功后在 Session 里放 `currentUser` → 跳转首页
-    - 代码参考：`e:\JavaWeb\demo01\src\servlet\LoginServlet.java:32-53`
-- 注册
-    - 表单提交到 `POST /register` → 先查重，再插入用户，登录并跳转
-    - 代码参考：`e:\JavaWeb\demo01\src\servlet\RegisterServlet.java:18-71`
-- 鉴权
-    - 过滤器放行登录/注册与静态资源；其它路径需要 Session 里有 `currentUser`
-    - 代码参考：`e:\JavaWeb\demo01\src\filter\AuthFilter.java:22-33`
-- 地址新增
-    - 表单提交到 `POST /addAddress` → Service 校验 → DAO 插入
-    - 代码参考：`e:\JavaWeb\demo01\src\servlet\AddAddressServlet.java:25-54`、`e:\JavaWeb\demo01\src\dao\impl\AddressDaoImpl.java:12-23`
-- 地址查询
-    - `GET /queryAddress?keyword=...&page=...&pageSize=...` → Servlet 解析分页参数并做默认值 → Service 计算偏移量 → DAO 使用 `COUNT` 与 `LIMIT 偏移量, 固定条数` 查询 → 结果与分页信息放入 `request` → 转发到 JSP
-    - 代码参考：`e:\JavaWeb\demo01\src\servlet\QueryAddressServlet.java:29-48`、`e:\JavaWeb\demo01\src\service\impl\AddressServiceImpl.java:67-76`、`e:\JavaWeb\demo01\src\dao\impl\AddressDaoImpl.java:47-81`
-    
- - 地址修改
-    - 列表页点击“改”进入 `GET /updateAddress?id=...` → 加载并回填到 `edit_address.jsp` → 在编辑页提交到 `POST /updateAddress`
-    - 代码参考：`e:\JavaWeb\demo01\src\servlet\UpdateAddressServlet.java:19-35`（GET 加载）、`e:\JavaWeb\demo01\src\servlet\UpdateAddressServlet.java:38-67`（POST 更新）；Service `e:\JavaWeb\demo01\src\service\impl\AddressServiceImpl.java:79-87`；DAO `e:\JavaWeb\demo01\src\dao\impl\AddressDaoImpl.java:72-78,81-94`
+- 所有业务接口（登录、注册、注销、地址增删改查）统一返回 JSON：
+  - `success`：布尔值，表示请求是否成功
+  - `message`：字符串，提示信息
+  - `redirect`：字符串，非空时前端应导航到该地址
+- 未登录行为：
+  - 页面资源（JSP）：重定向到登录页
+  - API 请求：返回 `{ success:false, message:"未登录", redirect:"/login.jsp" }`
 
- - 地址删除
-    - 列表页“删”按钮以 `POST /deleteAddress` 提交 `id` → 删除后重定向回查询页并保留分页参数
-    - 代码参考：`e:\JavaWeb\demo01\src\servlet\DeleteAddressServlet.java:16-35`；Service `e:\JavaWeb\demo01\src\service\impl\AddressServiceImpl.java:89-92`；DAO `e:\JavaWeb\demo01\src\dao\impl\AddressDaoImpl.java:96-100`
-- 注销与在线人数
-    - `GET /logout` → 移除 `currentUser` 并失效会话，监听器触发在线人数 --，首页显示当前在线用户数
-    - 代码参考：`e:\JavaWeb\demo01\src\servlet\LogoutServlet.java:9-23`、`e:\JavaWeb\demo01\src\listener\OnlineUserCounter.java:1-49`、`e:\JavaWeb\demo01\web\index.jsp:23-30`
+**前端约定**
 
-**关键代码理解**
+- 使用 `fetch` 发送请求：
+  - POST 使用 `application/x-www-form-urlencoded` 发送体（`URLSearchParams`）
+  - 设置头 `X-Requested-With: XMLHttpRequest`
+  - 根据响应 `success/redirect/message` 做提示与跳转
+- 查询页（`query_address.jsp`）：
+  - 表单 `submit` 被拦截并触发 `load()`，加载分页数据并渲染表格
+  - 分页（首页/上一页/下一页/尾页/跳页/每页大小）均触发 AJAX 查询
+  - 删除按钮按 `id` 发起 `POST /deleteAddress`，成功后刷新列表
+  - 收到未登录的 JSON 时自动跳转登录页
 
-- 编码与拦截
-    - 编码设置位置：`AuthFilter.doFilter` 中 `request.setCharacterEncoding("utf-8")` 与 `response.setCharacterEncoding("utf-8")` `e:\JavaWeb\demo01\src\filter\AuthFilter.java:22-24`
-    - 白名单策略：是否放行由 URI 结尾匹配决定 `e:\JavaWeb\demo01\src\filter\AuthFilter.java:26-33`
-- JDBC 封装
-    - `BaseDao` 用可变参数绑定占位符，`executeQuery` 使用回调解析结果集 `e:\JavaWeb\demo01\src\dao\BaseDao.java:22-45`
-    - 连接初始化读取 `db.properties` 并 `Class.forName` 注册驱动 `e:\JavaWeb\demo01\src\dao\DBUtil.java:20-35`
-- 业务分层
-    - Service 负责参数校验与组合 DAO，体现“控制层不直接碰数据库”的分层思想 `e:\JavaWeb\demo01\src\service\impl\AddressServiceImpl.java:19-30`
-    - 分页相关：`countAddresses` 与分页版 `searchAddresses` 负责计数与计算偏移量 `e:\JavaWeb\demo01\src\service\impl\AddressServiceImpl.java:67-76`
-- 分页参数保护
-    - Servlet 中对空字符串默认处理，避免 `NumberFormatException`：`e:\JavaWeb\demo01\src\servlet\QueryAddressServlet.java:31-35`
-- 在线用户计数
-    - 监听 `Session` 属性增删与会话销毁实现 ++/--，并提供 `getCount()` 供 JSP 显示 `e:\JavaWeb\demo01\src\listener\OnlineUserCounter.java:1-49`
+**后端约定**
+
+- 所有 Servlet 输出均为 JSON（页面渲染除外）：
+  - 登录与注册：成功时在 Session 放入 `currentUser` 并返回 `redirect` 到首页
+  - 注销：删除 `currentUser` 并返回 `redirect` 到首页
+  - 地址新增/修改/删除：返回操作结果与消息，必要时返回 `redirect`
+  - 地址查询：返回分页信息与列表数组
+- 统一的 JSON 写出逻辑在各 Servlet 内部的 `writeJson(...)` 方法中使用（避免转义问题）
+
+**关键流程与代码参考**
+
+- 登录：`src/servlet/LoginServlet.java:16-29` 写出 JSON；`src/servlet/LoginServlet.java:41-63` 处理登录与会话
+- 注册：`src/servlet/RegisterServlet.java:16-28` 写出 JSON；`src/servlet/RegisterServlet.java:38-65` 处理注册与会话
+- 注销：`src/servlet/LogoutServlet.java:12-23` 写出 JSON；`src/servlet/LogoutServlet.java:27-37` 处理注销并返回重定向 JSON
+- 查询地址：`src/servlet/QueryAddressServlet.java:22-95` 解析条件与分页、返回列表 JSON
+- 新增地址：`src/servlet/AddAddressServlet.java:31-60` 解析参数、返回结果 JSON
+- 修改地址：`src/servlet/UpdateAddressServlet.java:31-49` 加载编辑页；`src/servlet/UpdateAddressServlet.java:52-77` 处理更新并返回 JSON
+- 删除地址：`src/servlet/DeleteAddressServlet.java:20-35` 根据 `id` 删除并返回 JSON
+- 鉴权拦截：`src/filter/AuthFilter.java:39-47` 未登录时区分页面与 API 的处理
+- 在线人数：`src/listener/OnlineUserCounter.java:12-58` 基于 `currentUser` 属性增删与会话销毁进行计数
+
+**页面导航与状态**
+
+- 首页“查询地址”链接指向 `query_address.jsp`（页面），由页面脚本去请求数据接口
+- 编辑页“返回列表”链接指向 `query_address.jsp` 并带回查询条件与分页参数
+- 修复点：
+  - 避免字段重名：编辑页用于回传查询条件的隐藏域改为 `contactFilter`，避免与联系人输入框同名导致更新联系人的值被覆盖
+  - 查询页读取表单值通过选择器获取输入项，避免与表单属性名冲突（如 `.id`）
+
+**运行说明**
+
+- 将项目部署到 Servlet 容器（如 Tomcat），确保 `web/WEB-INF/lib/` 中的依赖（`javax.servlet-api`、`mysql-connector`）可用
+- 数据源配置位于 `src/dao/DBUtil.java` 与 `db.properties`（如存在）
+- 欢迎页为 `index.jsp`
+
+**约束与注意**
+
+- 后端不再判断“是否为 AJAX”，所有业务接口统一输出 JSON；前端负责解析并根据 `redirect` 跳转
+- 页面类资源（`.jsp`）仍以服务端渲染为主，仅在页面内部通过脚本发起 AJAX
+- 未登录时的统一处理：API 返回 JSON；页面跳转到登录页
+
+---
 
 **界面预览**
 
@@ -84,5 +109,7 @@
   ![注册](images/register.png)
 - 新增地址
   ![新增地址](images/add_address.png)
-- 查询/修改/删除地址
-  ![查询/修改/删除地址](images/select_update_delete_address.png)
+- 查询/删除地址
+  ![查询/删除地址](images/select_address.png)
+- 修改地址
+  ![修改地址](images/update_address.png)
