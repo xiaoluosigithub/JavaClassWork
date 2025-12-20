@@ -12,23 +12,21 @@ import javax.servlet.annotation.WebServlet; // 导入WebServlet注解
 import java.io.IOException;             // 导入IO异常处理类
 import java.util.Date;                  // 导入日期类
 
-/**
- * 处理新增地址的 Servlet
- */
+// 处理新增地址的 Servlet
 @WebServlet("/addAddress")  // 使用@WebServlet注解映射URL路径为/addAddress
 public class AddAddressServlet extends HttpServlet {
 
     // 通过业务层处理逻辑，实例化地址服务实现类
     private final AddressService addressService = new AddressServiceImpl();
 
-
+    // 处理 POST 请求，新增地址
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
         // 设置请求和响应的字符编码及内容类型
-        req.setCharacterEncoding("UTF-8");       // 设置请求编码为UTF-8
-        resp.setContentType("text/html;charset=UTF-8"); // 设置响应内容类型及编码
+        req.setCharacterEncoding("UTF-8");
+        resp.setContentType("application/json;charset=UTF-8");
 
         try {
             // 封装请求参数到Address对象中
@@ -39,18 +37,26 @@ public class AddAddressServlet extends HttpServlet {
             address.setTel(req.getParameter("tel"));                 // 获取联系电话
             address.setCreatedBy(Long.parseLong(req.getParameter("createdBy"))); // 获取创建者ID
             address.setCreationDate(new Date());                      // 设置创建时间为当前时间
+            String uid = req.getParameter("userId");
+            if (uid != null && !uid.trim().isEmpty()) {
+                address.setUserId(Long.parseLong(uid.trim()));
+            }
 
             // 调用业务逻辑执行地址添加操作
             boolean success = addressService.addAddress(address);
-            if (success) {
-                resp.getWriter().println("<script>alert('添加成功');location.href='add_address.jsp';</script>");
-            } else {
-                resp.getWriter().println("<script>alert('添加失败');location.href='add_address.jsp';</script>");
-            }
+            String redirect = req.getContextPath() + "/add_address.jsp";
+            String m = success ? "添加成功" : "添加失败";
+            String json = "{" +
+                    "\"success\":" + (success ? "true" : "false") + "," +
+                    "\"message\":\"" + m + "\"," +
+                    "\"redirect\":\"" + redirect + "\"" +
+                    "}";
+            resp.getWriter().write(json);
         } catch (Exception e) {
-            // 捕获并打印异常堆栈信息，并向客户端返回错误消息
             e.printStackTrace();
-            resp.getWriter().println("❌ 系统错误：" + e.getMessage());
+            String m = e.getMessage() == null ? "" : e.getMessage().replace("\\","\\\\").replace("\"","\\\"");
+            String json = "{\"success\":false,\"message\":\"系统错误：" + m + "\",\"redirect\":\"" + (req.getContextPath()+"/add_address.jsp") + "\"}";
+            resp.getWriter().write(json);
         }
     }
 }

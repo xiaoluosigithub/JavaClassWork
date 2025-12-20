@@ -36,8 +36,14 @@ public class AuthFilter implements Filter {
         // 检查用户是否已登录
         HttpSession session = request.getSession();
         if (session.getAttribute("currentUser") == null) {
-            // 未登录用户重定向到登录页面
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            boolean isPage = uri.endsWith(".jsp") || uri.equals(request.getContextPath() + "/") || uri.endsWith(".css") || uri.endsWith(".js");
+            if (isPage) {
+                response.sendRedirect(request.getContextPath() + "/login.jsp");
+            } else {
+                response.setContentType("application/json;charset=UTF-8");
+                String json = "{\"success\":false,\"message\":\"未登录\",\"redirect\":\"" + (request.getContextPath() + "/login.jsp") + "\"}";
+                response.getWriter().write(json);
+            }
             return;
         }
 
@@ -45,4 +51,3 @@ public class AuthFilter implements Filter {
         chain.doFilter(request, response);
     }
 }
-

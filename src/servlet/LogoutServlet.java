@@ -9,6 +9,19 @@ import java.io.IOException;
 
 @WebServlet("/logout")
 public class LogoutServlet extends HttpServlet {
+    private void writeJson(HttpServletResponse resp, boolean success, String message, String redirect) throws IOException {
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("application/json;charset=UTF-8");
+        String r = redirect == null ? "" : redirect;
+        String m = message == null ? "" : message.replace("\\", "\\\\").replace("\"", "\\\"");
+        String json = "{" +
+                "\"success\":" + (success ? "true" : "false") + "," +
+                "\"message\":\"" + m + "\"," +
+                "\"redirect\":\"" + r + "\"" +
+                "}";
+        resp.getWriter().write(json);
+    }
+
     // 处理 GET 请求，注销用户
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -20,8 +33,7 @@ public class LogoutServlet extends HttpServlet {
             // 使会话无效，销毁会话
             session.invalidate();
         }
-        // 重定向到首页 
-        resp.sendRedirect(req.getContextPath() + "/index.jsp");
+        writeJson(resp, true, "已注销", req.getContextPath() + "/index.jsp");
     }
 
     // 处理 POST 请求，注销用户

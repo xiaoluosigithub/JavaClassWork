@@ -13,13 +13,6 @@ public class RegisterServlet extends HttpServlet {
     // 注册服务实例
     private final UserService userService = new UserServiceImpl();
 
-    // 检查请求是否为 AJAX 请求
-    private boolean isAjax(HttpServletRequest req) {
-        String h = req.getHeader("X-Requested-With");
-        String p = req.getParameter("ajax");
-        return (h != null && h.equalsIgnoreCase("XMLHttpRequest")) || (p != null && p.equalsIgnoreCase("true"));
-    }
-
     // 写入 JSON 响应
     private void writeJson(HttpServletResponse resp, boolean success, String message, String redirect) throws IOException {
         resp.setCharacterEncoding("UTF-8");
@@ -52,44 +45,22 @@ public class RegisterServlet extends HttpServlet {
         // 验证用户名和密码是否为空
         if (username == null || username.trim().isEmpty() ||
                 password == null || password.trim().isEmpty()) {
-            // 如果用户名或密码为空，根据是否为 AJAX 请求返回不同响应
-            if (isAjax(req)) {
-                writeJson(resp, false, "用户名或密码不能为空", "");
-            } else {
-                req.setAttribute("error", "用户名或密码不能为空");
-                req.getRequestDispatcher("/register.jsp").forward(req, resp);
-            }
+            writeJson(resp, false, "用户名或密码不能为空", "");
             return;
         }
         // 检查用户名是否已存在
         if (userService.existsByUserName(username)) {
-            // 如果用户名已存在，根据是否为 AJAX 请求返回不同响应
-            if (isAjax(req)) {
-                writeJson(resp, false, "用户名已存在", "");
-            } else {
-                req.setAttribute("error", "用户名已存在");
-                req.getRequestDispatcher("/register.jsp").forward(req, resp);
-            }
+            writeJson(resp, false, "用户名已存在", "");
             return;
         }
         // 调用服务层注册方法，注册用户
         boolean ok = userService.register(username, password);
-        // 如果注册成功，根据是否为 AJAX 请求返回不同响应
         if (ok) {
             HttpSession session = req.getSession(true);
             session.setAttribute("currentUser", username);
-            if (isAjax(req)) {
-                writeJson(resp, true, "注册成功", req.getContextPath() + "/index.jsp");
-            } else {
-                resp.sendRedirect(req.getContextPath() + "/index.jsp");
-            }
+            writeJson(resp, true, "注册成功", req.getContextPath() + "/index.jsp");
         } else {
-            if (isAjax(req)) {
-                writeJson(resp, false, "注册失败，请重试", "");
-            } else {
-                req.setAttribute("error", "注册失败，请重试");
-                req.getRequestDispatcher("/register.jsp").forward(req, resp);
-            }
+            writeJson(resp, false, "注册失败，请重试", "");
         }
     }
 }

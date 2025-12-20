@@ -33,7 +33,27 @@
     </div>
 <h1>🏠 地址管理系统</h1>
 <a href="add_address.jsp">➕ 添加地址</a>
-<a href="queryAddress?page=1&pageSize=20">🔍 查询地址</a>
+<a href="query_address.jsp">🔍 查询地址</a>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const logoutLink = document.querySelector('.auth-links a[href="logout"]');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', async function(e) {
+      e.preventDefault();
+      try {
+        const res = await fetch('logout', {
+          method: 'POST',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await res.json();
+        alert(data.message || '');
+        if (data.redirect) location.href = data.redirect;
+      } catch (err) {
+        alert('请求失败');
+      }
+    });
+  }
+});
+</script>
 </body>
 </html>
-

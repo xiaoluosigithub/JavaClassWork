@@ -20,12 +20,44 @@
     <input type="text" name="tel" placeholder="电话" value="${address.tel}">
     <input type="text" name="userId" placeholder="用户ID" value="${address.userId}" required>
     <input type="text" name="modifyBy" placeholder="修改者ID" value="${address.modifyBy}">
-    <input type="hidden" name="contact" value="${contact}">
+    <input type="hidden" name="contactFilter" value="${contactFilter}">
     <input type="hidden" name="idParam" value="${id}">
     <input type="hidden" name="page" value="${page}">
     <input type="hidden" name="pageSize" value="${pageSize}">
     <button type="submit">提交</button>
-    <a href="queryAddress?id=${id}&contact=${contact}&page=${page}&pageSize=${pageSize}" style="display:block;margin-top:10px;text-align:center;">返回列表</a>
+    <a href="query_address.jsp?id=${id}&contact=${contactFilter}&page=${page}&pageSize=${pageSize}" style="display:block;margin-top:10px;text-align:center;">返回列表</a>
 </form>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const body = new URLSearchParams({
+      id: form.id.value,
+      contact: form.contact.value.trim(),
+      addressDesc: form.addressDesc.value.trim(),
+      postCode: form.postCode.value.trim(),
+      tel: form.tel.value.trim(),
+      userId: form.userId.value.trim(),
+      modifyBy: form.modifyBy.value.trim()
+    });
+    try {
+      const res = await fetch('updateAddress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: body.toString()
+      });
+      const data = await res.json();
+      alert(data.message || '');
+      if (data.redirect) location.href = data.redirect;
+    } catch (err) {
+      alert('请求失败');
+    }
+  });
+});
+</script>
 </body>
 </html>

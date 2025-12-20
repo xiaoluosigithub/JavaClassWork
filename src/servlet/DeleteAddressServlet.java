@@ -10,28 +10,28 @@ import java.io.IOException;
 
 @WebServlet("/deleteAddress")
 public class DeleteAddressServlet extends HttpServlet {
-
+    // 通过业务层处理逻辑，实例化地址服务实现类
     private final AddressService addressService = new AddressServiceImpl();
-
+    // 处理 POST 请求，根据 ID 删除地址
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
-        resp.setContentType("text/html;charset=UTF-8");
+        resp.setContentType("application/json;charset=UTF-8");
         try {
             long id = Long.parseLong(req.getParameter("id"));
             boolean ok = addressService.deleteById(id);
-            String contact = req.getParameter("contact");
-            String idParam = req.getParameter("idParam");
-            String page = req.getParameter("page");
-            String pageSize = req.getParameter("pageSize");
-            if (ok) {
-                resp.sendRedirect("queryAddress?id=" + (idParam==null?"":idParam) + "&contact=" + (contact==null?"":contact) + "&page=" + (page==null?"1":page) + "&pageSize=" + (pageSize==null?"5":pageSize));
-            } else {
-                resp.getWriter().println("❌ 删除失败");
-            }
+            String m = ok ? "删除成功" : "删除失败";
+            String json = "{" +
+                    "\"success\":" + (ok ? "true" : "false") + "," +
+                    "\"message\":\"" + m + "\"," +
+                    "\"redirect\":\"\"" +
+                    "}";
+            resp.getWriter().write(json);
         } catch (Exception e) {
             e.printStackTrace();
-            resp.getWriter().println("❌ 系统错误：" + e.getMessage());
+            String m = e.getMessage() == null ? "" : e.getMessage().replace("\\","\\\\").replace("\"","\\\"");
+            String json = "{\"success\":false,\"message\":\"系统错误：" + m + "\",\"redirect\":\"\"}";
+            resp.getWriter().write(json);
         }
     }
 }

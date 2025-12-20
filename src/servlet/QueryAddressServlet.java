@@ -19,12 +19,13 @@ public class QueryAddressServlet extends HttpServlet {
     // 创建业务逻辑层对象
     private final AddressService addressService = new AddressServiceImpl();
 
+    // 处理 GET 请求，根据 ID 和联系人查询地址列表
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
         req.setCharacterEncoding("UTF-8");
-        resp.setContentType("text/html;charset=UTF-8");
+        resp.setContentType("application/json;charset=UTF-8");
 
         try {
             // 获取请求参数
@@ -56,20 +57,40 @@ public class QueryAddressServlet extends HttpServlet {
             // 查询
             List<Address> list = addressService.searchAddresses(id, contact, page, pageSize);
 
-            // 设置数据
-            req.setAttribute("addressList", list);
-            req.setAttribute("id", idStr);
-            req.setAttribute("contact", contact);
-            req.setAttribute("page", page);
-            req.setAttribute("pageSize", pageSize);
-            req.setAttribute("total", total);
-            req.setAttribute("maxPage", maxPage);
-
-            // 转发
-            req.getRequestDispatcher("query_address.jsp").forward(req, resp);
+            StringBuilder sb = new StringBuilder();
+            sb.append("{\"success\":true,");
+            sb.append("\"message\":\"\",");
+            sb.append("\"page\":").append(page).append(",");
+            sb.append("\"pageSize\":").append(pageSize).append(",");
+            sb.append("\"total\":").append(total).append(",");
+            sb.append("\"maxPage\":").append(maxPage).append(",");
+            sb.append("\"list\":[");
+            for (int i = 0; i < list.size(); i++) {
+                Address a = list.get(i);
+                String contactVal = a.getContact() == null ? "" : a.getContact().replace("\\","\\\\").replace("\"","\\\"");
+                String addrDesc = a.getAddressDesc() == null ? "" : a.getAddressDesc().replace("\\","\\\\").replace("\"","\\\"");
+                String postCode = a.getPostCode() == null ? "" : a.getPostCode().replace("\\","\\\\").replace("\"","\\\"");
+                String tel = a.getTel() == null ? "" : a.getTel().replace("\\","\\\\").replace("\"","\\\"");
+                String creation = a.getCreationDate() == null ? "" : a.getCreationDate().toString().replace("\"","\\\"");
+                sb.append("{")
+                  .append("\"id\":").append(a.getId()).append(",")
+                  .append("\"contact\":\"").append(contactVal).append("\",")
+                  .append("\"addressDesc\":\"").append(addrDesc).append("\",")
+                  .append("\"postCode\":\"").append(postCode).append("\",")
+                  .append("\"tel\":\"").append(tel).append("\",")
+                  .append("\"userId\":").append(a.getUserId()==null?0:a.getUserId()).append(",")
+                  .append("\"createdBy\":").append(a.getCreatedBy()==null?0:a.getCreatedBy()).append(",")
+                  .append("\"creationDate\":\"").append(creation).append("\"")
+                  .append("}");
+                if (i < list.size() - 1) sb.append(",");
+            }
+            sb.append("]}");
+            resp.getWriter().write(sb.toString());
         } catch (Exception e) {
             e.printStackTrace();
-            resp.getWriter().println("❌ 查询失败：" + e.getMessage());
+            String m = e.getMessage() == null ? "" : e.getMessage().replace("\\","\\\\").replace("\"","\\\"");
+            String json = "{\"success\":false,\"message\":\"查询失败：" + m + "\",\"redirect\":\"\"}";
+            resp.getWriter().write(json);
         }
     }
 }

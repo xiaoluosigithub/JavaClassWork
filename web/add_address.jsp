@@ -29,5 +29,36 @@
     <button type="submit">提交</button>
     <a href="index.jsp" style="display:block;margin-top:10px;text-align:center;">返回首页</a>
 </form>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const body = new URLSearchParams({
+      contact: form.contact.value.trim(),
+      addressDesc: form.addressDesc.value.trim(),
+      postCode: form.postCode.value.trim(),
+      tel: form.tel.value.trim(),
+      createdBy: form.createdBy.value.trim(),
+      userId: form.userId.value.trim()
+    });
+    try {
+      const res = await fetch('addAddress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: body.toString()
+      });
+      const data = await res.json();
+      alert(data.message || '');
+      if (data.redirect) location.href = data.redirect;
+    } catch (err) {
+      alert('请求失败');
+    }
+  });
+});
+</script>
 </body>
 </html>
