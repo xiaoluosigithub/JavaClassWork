@@ -7,12 +7,12 @@
 **项目结构**
 
 - 表现层（JSP）
-  - `web/index.jsp` 首页，显示在线人数、登录/注册/退出；退出使用 AJAX 并按 JSON 的 `redirect` 跳转
-  - `web/login.jsp` 登录表单，使用 `fetch('login', POST)` 并解析 JSON
-  - `web/register.jsp` 注册表单，使用 `fetch('register', POST)` 并解析 JSON
-  - `web/add_address.jsp` 新增地址，使用 `fetch('addAddress', POST)` 并解析 JSON
-  - `web/query_address.jsp` 查询地址，所有查询、分页与删除操作均为 AJAX；首次加载自动发起查询
-  - `web/edit_address.jsp` 编辑地址，GET 加载并回填；POST 提交更新为 AJAX
+  - `web/index.jsp` 首页，显示在线人数、登录/注册/退出；退出使用 jQuery AJAX 并按 JSON 的 `redirect` 跳转
+  - `web/login.jsp` 登录表单，使用 jQuery 的 `$.ajax('login', POST)` 并解析 JSON
+  - `web/register.jsp` 注册表单，使用 jQuery 的 `$.ajax('register', POST)` 并解析 JSON
+  - `web/add_address.jsp` 新增地址，使用 jQuery 的 `$.ajax('addAddress', POST)` 并解析 JSON
+  - `web/query_address.jsp` 查询地址，所有查询、分页与删除操作均为 jQuery AJAX；首次加载自动发起查询
+  - `web/edit_address.jsp` 编辑地址，GET 加载并回填；POST 提交更新为 jQuery AJAX
 - 控制层（Servlet）
   - 登录：`src/servlet/LoginServlet.java`（`/login`）
   - 注册：`src/servlet/RegisterServlet.java`（`/register`）
@@ -44,16 +44,18 @@
   - 页面资源（JSP）：重定向到登录页
   - API 请求：返回 `{ success:false, message:"未登录", redirect:"/login.jsp" }`
 
-**前端约定**
+**前端约定（jQuery）**
 
-- 使用 `fetch` 发送请求：
-  - POST 使用 `application/x-www-form-urlencoded` 发送体（`URLSearchParams`）
-  - 设置头 `X-Requested-With: XMLHttpRequest`
-  - 根据响应 `success/redirect/message` 做提示与跳转
+- 统一使用 jQuery 发送请求：
+  - `$.ajax({ url, type: 'POST'|'GET', data, dataType: 'json', headers: { 'X-Requested-With': 'XMLHttpRequest' } })`
+  - 表单值读取：`$.trim($(form).find('[name="field"]').val())`
+  - 响应处理：根据 `success/redirect/message` 做提示与跳转
+  - 查询使用 `type: 'GET'` 携带分页与条件；新增/编辑/删除使用 `type: 'POST'`
+  - jQuery 引入采用 CDN：`https://code.jquery.com/jquery-3.7.1.min.js`（如有外网限制，建议改为本地文件并统一引用）
 - 查询页（`query_address.jsp`）：
-  - 表单 `submit` 被拦截并触发 `load()`，加载分页数据并渲染表格
-  - 分页（首页/上一页/下一页/尾页/跳页/每页大小）均触发 AJAX 查询
-  - 删除按钮按 `id` 发起 `POST /deleteAddress`，成功后刷新列表
+  - 表单 `submit` 被拦截并触发 `load()`，通过 jQuery AJAX 加载分页数据并渲染表格
+  - 分页（首页/上一页/下一页/尾页/跳页/每页大小）均触发 jQuery AJAX 查询
+  - 删除按钮按 `id` 发起 `POST /deleteAddress`，成功后刷新列表（使用事件委托保障动态行可用）
   - 收到未登录的 JSON 时自动跳转登录页
 
 **后端约定**
