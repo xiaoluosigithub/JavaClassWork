@@ -18,12 +18,17 @@
         table { width: 90%; margin: 30px auto; border-collapse: collapse; background: white; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
         th { background: #0078d7; color: white; }
+        .meta { width: 90%; margin: 10px auto; text-align: right; }
+        .meta .time { display: inline-block; padding: 6px 12px; background: #fff; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); color: #666; font-size: 14px; }
+        #rows tr.row-odd { background: #f9fbff; }
+        #rows tr.row-even { background: #ffffff; }
+        #rows tr:hover { background: #eef6ff; }
     </style>
 </head>
 <body>
-<%= new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()) %>
+<div class="meta"><span class="time">当前时间：<%= new java.text.SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss", java.util.Locale.CHINA).format(new java.util.Date()) %></span></div>
 
-
+<!-- 查询地址表单 -->
 <form action="queryAddress" method="get">
     <input type="number" name="id" value="${param.id}" placeholder="输入ID">
     <input type="text" name="contact" value="${param.contact}" placeholder="输入联系人（支持模糊）">
@@ -33,6 +38,7 @@
     <a href="index.jsp" style="margin-left:20px;">返回首页</a>
 </form>
 
+<!-- 查询结果表格 -->
 <table>
     <tr>
         <th>ID</th><th>联系人</th><th>地址描述</th><th>邮编</th>
@@ -42,6 +48,7 @@
 </table>
 <div id="empty" style="text-align:center;color:red;display:none;">未找到匹配的记录。</div>
 
+<!-- 分页导航 -->
 <div style="width:90%; margin:10px auto; text-align:center;">
 
     <a href="#" id="first">首页</a>
@@ -66,27 +73,33 @@
         <button type="submit">设置每页</button>
     </form>
 </div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.querySelector('form[action="queryAddress"]');
-  const rows = document.getElementById('rows');
-  const empty = document.getElementById('empty');
-  const info = document.getElementById('info');
-  let page = 1;
-  let pageSize = 20;
-  let total = 0;
-  let maxPage = 1;
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script type="text/javascript">
+$(function() {
+  var $form = $('form[action="queryAddress"]').first(); // 获取查询地址表单
+  var $rows = $('#rows'); // 获取查询结果表格 tbody 元素
+  var $empty = $('#empty'); // 获取未找到记录提示元素
+  var $info = $('#info'); // 获取分页信息元素
+  var page = 1; // 当前页码
+  var pageSize = 20; // 每页记录数
+  var total = 0; // 总记录数
+  var maxPage = 1; // 最大页码  
+  // 渲染查询结果表格
   function render(list) {
-    rows.innerHTML = '';
     if (!list || list.length === 0) {
-      empty.style.display = 'block';
+      $rows.html('');
+      $empty.show();
       return;
     }
-    empty.style.display = 'none';
-    const html = list.map(a => {
-      const id = a.id;
-      const link = 'updateAddress?id=' + id;
-      return '<tr>' +
+    $empty.hide();
+    // 渲染查询结果表格行
+    var html = $.map(list, function(a, i) {
+      var id = a.id;
+      var link = 'updateAddress?id=' + id;
+      // 为偶数行添加不同的背景颜色
+      var rowClass = (i % 2 === 0) ? 'row-even' : 'row-odd';
+      return '<tr class="' + rowClass + '">' +
         '<td>' + (a.id||'') + '</td>' +
         '<td>' + (a.contact||'') + '</td>' +
         '<td>' + (a.addressDesc||'') + '</td>' +
@@ -100,80 +113,86 @@ document.addEventListener('DOMContentLoaded', function() {
         '</td>' +
       '</tr>';
     }).join('');
-    rows.innerHTML = html;
-    rows.querySelectorAll('button.del').forEach(btn => {
-      btn.addEventListener('click', async function() {
-        const id = this.getAttribute('data-id');
-        if (!confirm('确认删除该地址吗？')) return;
-        const body = new URLSearchParams({ id });
-        try {
-          const res = await fetch('deleteAddress', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: body.toString()
-          });
-          const data = await res.json();
-          if (!data.success && data.redirect) {
-            alert(data.message || '');
-            location.href = data.redirect;
-            return;
-          }
-          alert(data.message||'');
-          load();
-        } catch (e) {
-          alert('请求失败');
+    $rows.html(html);
+  }
+  // 加载查询结果
+  function load(p, ps) {
+    // ID值
+    var idVal = $.trim($form.find('input[name="id"]').val() || '');
+    // 联系人值
+    var contactVal = $.trim($form.find('input[name="contact"]').val() || '');
+    $.ajax({
+      url: 'queryAddress',
+      type: 'GET',
+      dataType: 'json',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      data: { id: idVal, contact: contactVal, page: p, pageSize: ps },
+      // 成功回调函数
+      success: function(data) {
+        if (!data.success && data.redirect) {
+          alert(data.message || '');
+          location.href = data.redirect;
+          return;
         }
-      });
-    });
-  }
-  async function load(p=page, ps=pageSize) {
-    const idInput = form.querySelector('input[name="id"]');
-    const contactInput = form.querySelector('input[name="contact"]');
-    const idVal = idInput ? idInput.value.trim() : '';
-    const contactVal = contactInput ? contactInput.value.trim() : '';
-    const params = new URLSearchParams({
-      id: idVal,
-      contact: contactVal,
-      page: p,
-      pageSize: ps
-    });
-    try {
-      const res = await fetch('queryAddress?' + params.toString(), {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      });
-      const data = await res.json();
-      if (!data.success && data.redirect) {
-        alert(data.message || '');
-        location.href = data.redirect;
-        return;
+        page = data.page || p; // 更新当前页码
+        pageSize = data.pageSize || ps; // 更新每页记录数
+        total = data.total || 0; // 更新总记录数
+        maxPage = data.maxPage || 1; // 更新最大页码
+        render(data.list || []); // 渲染查询结果表格
+        $info.text('共 ' + total + ' 条  共 ' + maxPage + ' 页  当前第 ' + page + ' 页  每页 ' + pageSize + ' 条'); // 更新分页信息
+      },
+      error: function() {
+        alert('加载失败');
       }
-      page = data.page || p;
-      pageSize = data.pageSize || ps;
-      total = data.total || 0;
-      maxPage = data.maxPage || 1;
-      render(data.list || []);
-      info.textContent = '共 ' + total + ' 条  共 ' + maxPage + ' 页  当前第 ' + page + ' 页  每页 ' + pageSize + ' 条';
-    } catch (e) {
-      alert('加载失败');
-    }
+    });
   }
-  form.addEventListener('submit', function(e) {
+  // 提交查询表单
+  $form.on('submit', function(e) {
     e.preventDefault();
     page = 1;
     load(1, pageSize);
   });
-  document.getElementById('first').addEventListener('click', function(e){ e.preventDefault(); page=1; load(1, pageSize); });
-  document.getElementById('prev').addEventListener('click', function(e){ e.preventDefault(); page = Math.max(1, page-1); load(page, pageSize); });
-  document.getElementById('next').addEventListener('click', function(e){ e.preventDefault(); page = Math.min(maxPage, page+1); load(page, pageSize); });
-  document.getElementById('last').addEventListener('click', function(e){ e.preventDefault(); page = maxPage; load(page, pageSize); });
-  const goForm = document.querySelectorAll('form[action="queryAddress"]')[1];
-  const sizeForm = document.querySelectorAll('form[action="queryAddress"]')[2];
-  goForm.addEventListener('submit', function(e){ e.preventDefault(); const p = parseInt(goForm.page.value||'1',10); page = Math.max(1, Math.min(maxPage, p)); load(page, pageSize); });
-  sizeForm.addEventListener('submit', function(e){ e.preventDefault(); const ps = parseInt(sizeForm.pageSize.value||'20',10); pageSize = Math.max(1, ps); page = 1; load(page, pageSize); });
-  load();
+  // 点击第一页按钮
+  $('#first').on('click', function(e){ e.preventDefault(); page=1; load(1, pageSize); });
+  // 点击上一页按钮  如果当前页码为1，则不执行跳转
+  $('#prev').on('click', function(e){ e.preventDefault(); page = Math.max(1, page-1); load(page, pageSize); });
+  // 点击下一页按钮  如果当前页码为最大页码，则不执行跳转 
+  $('#next').on('click', function(e){ e.preventDefault(); page = Math.min(maxPage, page+1); load(page, pageSize); });
+  // 点击最后一页按钮  如果当前页码为最大页码，则不执行跳转
+  $('#last').on('click', function(e){ e.preventDefault(); page = maxPage; load(page, pageSize); });
+  var $forms = $('form[action="queryAddress"]'); // 获取所有查询地址表单
+  var $goForm = $forms.eq(1); // 获取跳转页码表单
+  var $sizeForm = $forms.eq(2); // 获取设置每页记录数表单 
+  // 提交跳转页码表单
+  $goForm.on('submit', function(e){ e.preventDefault(); var p = parseInt($goForm.find('[name="page"]').val()||'1',10); page = Math.max(1, Math.min(maxPage, p)); load(page, pageSize); });
+  // 提交设置每页记录数表单
+  $sizeForm.on('submit', function(e){ e.preventDefault(); var ps = parseInt($sizeForm.find('[name="pageSize"]').val()||'20',10); pageSize = Math.max(1, ps); page = 1; load(page, pageSize); });
+  // 点击删除按钮
+  $rows.on('click', 'button.del', function() {
+    var id = $(this).data('id');
+    if (!confirm('确认删除该地址吗？')) return;
+    // 发送删除地址请求
+    $.ajax({
+      url: 'deleteAddress',
+      type: 'POST',
+      dataType: 'json',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      data: { id: id },
+      success: function(data) {
+        if (!data.success && data.redirect) {
+          alert(data.message || '');
+          location.href = data.redirect;
+          return;
+        }
+        alert(data.message||'');
+        load(page, pageSize);
+      },
+      error: function() {
+        alert('请求失败');
+      }
+    });
+  });
+  load(page, pageSize);
 });
 </script>
 </body>

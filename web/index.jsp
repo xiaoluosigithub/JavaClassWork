@@ -34,23 +34,28 @@
 <h1>🏠 地址管理系统</h1>
 <a href="add_address.jsp">➕ 添加地址</a>
 <a href="query_address.jsp">🔍 查询地址</a>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const logoutLink = document.querySelector('.auth-links a[href="logout"]');
-  if (logoutLink) {
-    logoutLink.addEventListener('click', async function(e) {
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script type="text/javascript">
+$(function() {
+  // 点击退出链接时发送退出请求
+  var $logoutLink = $('.auth-links a[href="logout"]');
+  // 绑定点击事件
+  if ($logoutLink.length) {
+    $logoutLink.on('click', function(e) {
       e.preventDefault();
-      try {
-        const res = await fetch('logout', {
-          method: 'POST',
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        });
-        const data = await res.json();
-        alert(data.message || '');
-        if (data.redirect) location.href = data.redirect;
-      } catch (err) {
-        alert('请求失败');
-      }
+      $.ajax({
+        url: 'logout',
+        type: 'POST',
+        dataType: 'json',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        success: function(data) {
+          alert(data.message || '');
+          if (data.redirect) location.href = data.redirect;
+        },
+        error: function() {
+          alert('请求失败');
+        }
+      });
     });
   }
 });

@@ -29,34 +29,40 @@
     <button type="submit">提交</button>
     <a href="index.jsp" style="display:block;margin-top:10px;text-align:center;">返回首页</a>
 </form>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.querySelector('form');
-  form.addEventListener('submit', async function(e) {
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script type="text/javascript">
+$(function() {
+  // 提交添加地址表单
+  $('form').submit(function(e) {
     e.preventDefault();
-    const body = new URLSearchParams({
-      contact: form.contact.value.trim(),
-      addressDesc: form.addressDesc.value.trim(),
-      postCode: form.postCode.value.trim(),
-      tel: form.tel.value.trim(),
-      createdBy: form.createdBy.value.trim(),
-      userId: form.userId.value.trim()
+    var $f = $(this); // 获取表单元素
+    var contact = $.trim($f.find('[name="contact"]').val()); // 获取联系人
+    var addressDesc = $.trim($f.find('[name="addressDesc"]').val()); // 获取地址描述
+    var postCode = $.trim($f.find('[name="postCode"]').val()); // 获取邮政编码
+    var tel = $.trim($f.find('[name="tel"]').val()); // 获取电话
+    var createdBy = $.trim($f.find('[name="createdBy"]').val()); // 获取创建者ID
+    var userId = $.trim($f.find('[name="userId"]').val()); // 获取用户ID  
+    $.ajax({
+      url: 'addAddress',
+      type: 'POST',
+      dataType: 'json',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      data: {
+        contact: contact,
+        addressDesc: addressDesc,
+        postCode: postCode,
+        tel: tel,
+        createdBy: createdBy,
+        userId: userId
+      },
+      success: function(data) {
+        alert(data.message || '');
+        if (data.redirect) location.href = data.redirect;
+      },
+      error: function() {
+        alert('请求失败');
+      }
     });
-    try {
-      const res = await fetch('addAddress', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: body.toString()
-      });
-      const data = await res.json();
-      alert(data.message || '');
-      if (data.redirect) location.href = data.redirect;
-    } catch (err) {
-      alert('请求失败');
-    }
   });
 });
 </script>

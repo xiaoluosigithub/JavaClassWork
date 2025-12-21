@@ -12,37 +12,38 @@
         .links a { color: #0078d7; text-decoration: none; }
         .error { color: red; text-align: center; }
     </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('form');
-            function show(msg) { alert(msg || ''); }
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const u = form.username.value.trim();
-                const p = form.password.value.trim();
-                if (!u || !p) { show('请输入用户名和密码'); return; }
-                const body = new URLSearchParams({ username: u, password: p });
-                try {
-                    const res = await fetch('register', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: body.toString()
-                    });
-                    const data = await res.json();
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        // 提交注册表单
+        $('form').submit(function(e) {
+            e.preventDefault();
+            var u = $.trim($(this).find('[name="username"]').val());
+            var p = $.trim($(this).find('[name="password"]').val());
+            if (!u || !p) {
+                alert('请输入用户名和密码');
+                return;
+            }
+            $.ajax({
+                url: 'register',
+                type: 'POST',
+                data: { username: u, password: p },
+                dataType: 'json',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success: function(data) {
                     if (data.success && data.redirect) {
                         alert(data.message || '注册成功');
                         window.location.href = data.redirect;
                     } else {
                         alert(data.message || '注册失败');
                     }
-                } catch (err) {
-                    show('请求失败');
+                },
+                error: function() {
+                    alert('请求失败');
                 }
             });
         });
+    });
     </script>
 </head>
 <body>

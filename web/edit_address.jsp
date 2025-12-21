@@ -27,35 +27,42 @@
     <button type="submit">提交</button>
     <a href="query_address.jsp?id=${id}&contact=${contactFilter}&page=${page}&pageSize=${pageSize}" style="display:block;margin-top:10px;text-align:center;">返回列表</a>
 </form>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.querySelector('form');
-  form.addEventListener('submit', async function(e) {
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script type="text/javascript">
+$(function() {
+  // 提交编辑地址表单
+  $('form').submit(function(e) {
     e.preventDefault();
-    const body = new URLSearchParams({
-      id: form.id.value,
-      contact: form.contact.value.trim(),
-      addressDesc: form.addressDesc.value.trim(),
-      postCode: form.postCode.value.trim(),
-      tel: form.tel.value.trim(),
-      userId: form.userId.value.trim(),
-      modifyBy: form.modifyBy.value.trim()
+    var $f = $(this); // 获取表单元素
+    var id = $f.find('[name="id"]').val(); // 获取地址ID
+    var contact = $.trim($f.find('[name="contact"]').val()); // 获取联系人
+    var addressDesc = $.trim($f.find('[name="addressDesc"]').val()); // 获取地址描述
+    var postCode = $.trim($f.find('[name="postCode"]').val()); // 获取邮政编码
+    var tel = $.trim($f.find('[name="tel"]').val()); // 获取电话
+    var userId = $.trim($f.find('[name="userId"]').val()); // 获取用户ID
+    var modifyBy = $.trim($f.find('[name="modifyBy"]').val()); // 获取修改者ID
+    $.ajax({
+      url: 'updateAddress',
+      type: 'POST',
+      dataType: 'json',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      data: {
+        id: id,
+        contact: contact,
+        addressDesc: addressDesc,
+        postCode: postCode,
+        tel: tel,
+        userId: userId,
+        modifyBy: modifyBy
+      },
+      success: function(data) {
+        alert(data.message || '');
+        if (data.redirect) location.href = data.redirect;
+      },
+      error: function() {
+        alert('请求失败');
+      }
     });
-    try {
-      const res = await fetch('updateAddress', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: body.toString()
-      });
-      const data = await res.json();
-      alert(data.message || '');
-      if (data.redirect) location.href = data.redirect;
-    } catch (err) {
-      alert('请求失败');
-    }
   });
 });
 </script>
