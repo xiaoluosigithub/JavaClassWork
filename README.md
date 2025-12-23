@@ -1,19 +1,20 @@
-**项目说明**
+**项目说明** 
 
+- 语雀链接：[JavaWeb](https://www.yuque.com/xiaoluosi-lmxov/ksxj/nagdogia7az53zn5)
 - 概览：本项目采用 JSP 前端 + Servlet 后端，所有业务请求统一走 AJAX，后端统一返回 JSON。未登录时，API 返回 JSON（含 `redirect` 登录页）；页面类资源（JSP）仍重定向到登录页。
 - 页面入口：`web/index.jsp`；其“查询地址”链接指向 `web/query_address.jsp`，该页用脚本发起查询、分页与删除请求。
 - 统一响应格式：`{"success":true|false,"message":"...","redirect":"..."}`
 
 **项目结构**
 
-- 表现层（JSP）
+- 表现层[（JSP）](https://www.yuque.com/xiaoluosi-lmxov/ksxj/th9whlxavg6gqbwx)
   - `web/index.jsp` 首页，显示在线人数、登录/注册/退出；退出使用 jQuery AJAX 并按 JSON 的 `redirect` 跳转
   - `web/login.jsp` 登录表单，使用 jQuery 的 `$.ajax('login', POST)` 并解析 JSON
   - `web/register.jsp` 注册表单，使用 jQuery 的 `$.ajax('register', POST)` 并解析 JSON
   - `web/add_address.jsp` 新增地址，使用 jQuery 的 `$.ajax('addAddress', POST)` 并解析 JSON
   - `web/query_address.jsp` 查询地址，所有查询、分页与删除操作均为 jQuery AJAX；首次加载自动发起查询
   - `web/edit_address.jsp` 编辑地址，GET 加载并回填；POST 提交更新为 jQuery AJAX
-- 控制层（Servlet）
+- 控制层[（Servlet）](https://www.yuque.com/xiaoluosi-lmxov/ksxj/ou2g4nqingvnt0hb)
   - 登录：`src/servlet/LoginServlet.java`（`/login`）
   - 注册：`src/servlet/RegisterServlet.java`（`/register`）
   - 注销：`src/servlet/LogoutServlet.java`（`/logout`）
@@ -21,9 +22,9 @@
   - 查询地址：`src/servlet/QueryAddressServlet.java`（`/queryAddress`）
   - 编辑地址：`src/servlet/UpdateAddressServlet.java`（`/updateAddress`）
   - 删除地址：`src/servlet/DeleteAddressServlet.java`（`/deleteAddress`）
-- 过滤器
+- 过滤器[(Filter)](https://www.yuque.com/xiaoluosi-lmxov/ksxj/kv6uddu7me3i1i7y)
   - `src/filter/AuthFilter.java` 登录拦截；页面资源未登录时重定向到登录页，API 请求未登录时返回 JSON
-- 监听器
+- 监听器[(Listener)](https://www.yuque.com/xiaoluosi-lmxov/ksxj/xikw4zblukgboelb)
   - `src/listener/OnlineUserCounter.java` 简化为 `int` 计数，监听会话属性增删与会话销毁
 - 业务层（Service）
   - `src/service/AddressService.java`、`src/service/impl/AddressServiceImpl.java`
@@ -44,7 +45,7 @@
   - 页面资源（JSP）：重定向到登录页
   - API 请求：返回 `{ success:false, message:"未登录", redirect:"/login.jsp" }`
 
-**前端约定（jQuery）**
+**前端约定[（jQuery）](https://www.yuque.com/xiaoluosi-lmxov/ksxj/thg1ldvygz431sgm)**
 
 - 统一使用 jQuery 发送请求：
   - `$.ajax({ url, type: 'POST'|'GET', data, dataType: 'json', headers: { 'X-Requested-With': 'XMLHttpRequest' } })`
