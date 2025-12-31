@@ -53,7 +53,7 @@
   - 表单值读取：`$.trim($(form).find('[name="field"]').val())`
   - 响应处理：根据 `success/redirect/message` 做提示与跳转
   - 查询使用 `type: 'GET'` 携带分页与条件；新增/编辑/删除使用 `type: 'POST'`
-  - jQuery 引入采用 CDN：`https://code.jquery.com/jquery-3.7.1.min.js`（如有外网限制，建议改为本地文件并统一引用）
+  - jQuery 引入采用 CDN：
 - 样式与交互：
   - 引入 `web/css/style.css` 统一全站视觉风格
   - 登录页通过 `localStorage` 存储/读取用户名和密码，实现“记住密码”功能
