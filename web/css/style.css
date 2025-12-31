@@ -92,6 +92,25 @@ input:focus {
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
 }
 
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.2rem;
+    justify-content: flex-start;
+}
+
+.checkbox-container input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+    margin-bottom: 0;
+}
+
+.checkbox-container label {
+    font-size: 0.95rem;
+    color: #555;
+    cursor: pointer;
+}
+
 button, .btn {
     display: inline-block;
     width: auto;

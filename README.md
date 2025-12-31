@@ -8,8 +8,9 @@
 **项目结构**
 
 - 表现层[（JSP）](https://www.yuque.com/xiaoluosi-lmxov/ksxj/th9whlxavg6gqbwx)
+  - `web/css/style.css` 全局样式文件，采用现代化设计（卡片式布局、响应式表格、斑马纹列表等）
   - `web/index.jsp` 首页，显示在线人数、登录/注册/退出；退出使用 jQuery AJAX 并按 JSON 的 `redirect` 跳转
-  - `web/login.jsp` 登录表单，使用 jQuery 的 `$.ajax('login', POST)` 并解析 JSON
+  - `web/login.jsp` 登录表单，支持“记住密码”（LocalStorage），使用 jQuery 的 `$.ajax('login', POST)` 并解析 JSON
   - `web/register.jsp` 注册表单，使用 jQuery 的 `$.ajax('register', POST)` 并解析 JSON
   - `web/add_address.jsp` 新增地址，使用 jQuery 的 `$.ajax('addAddress', POST)` 并解析 JSON
   - `web/query_address.jsp` 查询地址，所有查询、分页与删除操作均为 jQuery AJAX；首次加载自动发起查询
@@ -53,6 +54,9 @@
   - 响应处理：根据 `success/redirect/message` 做提示与跳转
   - 查询使用 `type: 'GET'` 携带分页与条件；新增/编辑/删除使用 `type: 'POST'`
   - jQuery 引入采用 CDN：`https://code.jquery.com/jquery-3.7.1.min.js`（如有外网限制，建议改为本地文件并统一引用）
+- 样式与交互：
+  - 引入 `web/css/style.css` 统一全站视觉风格
+  - 登录页通过 `localStorage` 存储/读取用户名和密码，实现“记住密码”功能
 - 查询页（`query_address.jsp`）：
   - 表单 `submit` 被拦截并触发 `load()`，通过 jQuery AJAX 加载分页数据并渲染表格
   - 分页（首页/上一页/下一页/尾页/跳页/每页大小）均触发 jQuery AJAX 查询
