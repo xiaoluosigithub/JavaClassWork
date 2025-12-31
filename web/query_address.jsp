@@ -10,32 +10,19 @@
 <html>
 <head>
     <title>查询地址</title>
-    <style>
-        body { font-family: Arial; background: #f5f6fa; }
-        form { text-align: center; margin-top: 40px; }
-        input { padding: 10px; width: 250px; }
-        button { padding: 10px 20px; background: #0078d7; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        table { width: 90%; margin: 30px auto; border-collapse: collapse; background: white; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-        th { background: #0078d7; color: white; }
-        .meta { width: 90%; margin: 10px auto; text-align: right; }
-        .meta .time { display: inline-block; padding: 6px 12px; background: #fff; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); color: #666; font-size: 14px; }
-        #rows tr.row-odd { background: #f9fbff; }
-        #rows tr.row-even { background: #ffffff; }
-        #rows tr:hover { background: #eef6ff; }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div class="meta"><span class="time">当前时间：<%= new java.text.SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss", java.util.Locale.CHINA).format(new java.util.Date()) %></span></div>
 
 <!-- 查询地址表单 -->
-<form action="queryAddress" method="get">
+<form action="queryAddress" method="get" class="search-form search-bar">
     <input type="number" name="id" value="${param.id}" placeholder="输入ID">
     <input type="text" name="contact" value="${param.contact}" placeholder="输入联系人（支持模糊）">
     <input type="hidden" name="page" value="1"/>
     <input type="hidden" name="pageSize" value="20"/>
     <button type="submit">查询</button>
-    <a href="index.jsp" style="margin-left:20px;">返回首页</a>
+    <a href="index.jsp" class="btn" style="margin-left:10px;background:#6c757d;">返回首页</a>
 </form>
 
 <!-- 查询结果表格 -->
@@ -46,10 +33,10 @@
     </tr>
     <tbody id="rows"></tbody>
 </table>
-<div id="empty" style="text-align:center;color:red;display:none;">未找到匹配的记录。</div>
+<div id="empty" style="text-align:center;color:red;display:none;margin-top:20px;">未找到匹配的记录。</div>
 
 <!-- 分页导航 -->
-<div style="width:90%; margin:10px auto; text-align:center;">
+<div class="pagination">
 
     <a href="#" id="first">首页</a>
     <a href="#" id="prev">上一页</a>
@@ -108,8 +95,8 @@ $(function() {
         '<td>' + (a.userId||'') + '</td>' +
         '<td>' + (a.creationDate||'') + '</td>' +
         '<td>' +
-          '<a href="'+link+'" style="padding:6px 10px;background:#28a745;color:#fff;border-radius:4px;text-decoration:none;margin-right:6px;">改</a>' +
-          '<button data-id="'+id+'" class="del" style="padding:6px 10px;background:#dc3545;color:#fff;border:none;border-radius:4px;cursor:pointer;">删</button>' +
+          '<a href="'+link+'" class="btn btn-secondary" style="width:auto;padding:6px 12px;margin-right:6px;">改</a>' +
+          '<button data-id="'+id+'" class="del btn btn-danger" style="width:auto;padding:6px 12px;">删</button>' +
         '</td>' +
       '</tr>';
     }).join('');

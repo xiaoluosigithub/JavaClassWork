@@ -10,14 +10,7 @@
 <html>
 <head>
     <title>地址管理系统</title>
-    <style>
-        body { font-family: Arial; background: #f7f8fa; text-align: center; padding: 60px; }
-        a { text-decoration: none; color: white; background: #0078d7; padding: 12px 24px; border-radius: 6px; margin: 10px; display: inline-block; }
-        a:hover { background: #005fa3; }
-        .auth-links { position: absolute; top: 20px; right: 20px; }
-        .auth-links a { padding: 8px 16px; margin: 0 6px; font-size: 14px; }
-        .auth-links span { color: #333; font-size: 14px; }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="auth-links">
@@ -31,9 +24,21 @@
         <% } %>
         <span>在线用户：<%= OnlineUserCounter.getCount() %></span>
     </div>
-<h1>🏠 地址管理系统</h1>
-<a href="add_address.jsp">➕ 添加地址</a>
-<a href="query_address.jsp">🔍 查询地址</a>
+
+    <div class="home-container">
+        <h1>🏠 地址管理系统</h1>
+        <div class="action-buttons">
+            <a href="add_address.jsp">
+                <span>➕</span>
+                <span>添加地址</span>
+            </a>
+            <a href="query_address.jsp">
+                <span>🔍</span>
+                <span>查询地址</span>
+            </a>
+        </div>
+    </div>
+
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script type="text/javascript">
 $(function() {

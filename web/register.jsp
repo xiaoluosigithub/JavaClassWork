@@ -2,16 +2,7 @@
 <html>
 <head>
     <title>注册</title>
-    <style>
-        body { font-family: Arial; background: #f5f6fa; }
-        form { width: 380px; margin: 80px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        input, button { width: 100%; padding: 10px; margin-top: 10px; }
-        button { background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button:hover { background: #1e7e34; }
-        .links { text-align: center; margin-top: 10px; }
-        .links a { color: #0078d7; text-decoration: none; }
-        .error { color: red; text-align: center; }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script type="text/javascript">
     $(function() {
@@ -47,7 +38,7 @@
     </script>
 </head>
 <body>
-<form action="register" method="post">
+<form action="register" method="post" class="styled-form">
     <h2>📝 注册</h2>
     <input type="text" name="username" placeholder="用户名" required>
     <input type="password" name="password" placeholder="密码" required>

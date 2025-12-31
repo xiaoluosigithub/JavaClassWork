@@ -2,16 +2,10 @@
 <html>
 <head>
     <title>编辑地址</title>
-    <style>
-        body { font-family: Arial; background: #f5f6fa; }
-        form { width: 400px; margin: 80px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        input, button { width: 100%; padding: 10px; margin-top: 10px; }
-        button { background: #0078d7; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button:hover { background: #005fa3; }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<form action="updateAddress" method="post">
+<form action="updateAddress" method="post" class="styled-form">
     <h2>✏️ 编辑地址</h2>
     <input type="hidden" name="id" value="${address.id}">
     <input type="text" name="contact" placeholder="联系人" value="${address.contact}" required>
@@ -25,7 +19,9 @@
     <input type="hidden" name="page" value="${page}">
     <input type="hidden" name="pageSize" value="${pageSize}">
     <button type="submit">提交</button>
-    <a href="query_address.jsp?id=${id}&contact=${contactFilter}&page=${page}&pageSize=${pageSize}" style="display:block;margin-top:10px;text-align:center;">返回列表</a>
+    <div class="links">
+        <a href="query_address.jsp?id=${id}&contact=${contactFilter}&page=${page}&pageSize=${pageSize}">返回列表</a>
+    </div>
 </form>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script type="text/javascript">
