@@ -1,5 +1,7 @@
 package servlet;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import service.AddressService;
 import service.impl.AddressServiceImpl;
 
@@ -21,17 +23,19 @@ public class DeleteAddressServlet extends HttpServlet {
             long id = Long.parseLong(req.getParameter("id"));
             boolean ok = addressService.deleteById(id);
             String m = ok ? "删除成功" : "删除失败";
-            String json = "{" +
-                    "\"success\":" + (ok ? "true" : "false") + "," +
-                    "\"message\":\"" + m + "\"," +
-                    "\"redirect\":\"\"" +
-                    "}";
-            resp.getWriter().write(json);
+            JSONObject obj = new JSONObject();
+            obj.put("success", ok);
+            obj.put("message", m);
+            obj.put("redirect", "");
+            resp.getWriter().write(JSON.toJSONString(obj));
         } catch (Exception e) {
             e.printStackTrace();
-            String m = e.getMessage() == null ? "" : e.getMessage().replace("\\","\\\\").replace("\"","\\\"");
-            String json = "{\"success\":false,\"message\":\"系统错误：" + m + "\",\"redirect\":\"\"}";
-            resp.getWriter().write(json);
+            String m = e.getMessage() == null ? "" : e.getMessage();
+            JSONObject obj = new JSONObject();
+            obj.put("success", false);
+            obj.put("message", "系统错误：" + m);
+            obj.put("redirect", "");
+            resp.getWriter().write(JSON.toJSONString(obj));
         }
     }
 }

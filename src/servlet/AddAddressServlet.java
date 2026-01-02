@@ -1,7 +1,8 @@
-// 声明包名，表示该类属于servlet包
 package servlet;
 
 // 导入所需的类
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import pojo.Address;                     // 导入地址数据访问对象
 import service.AddressService;          // 导入地址服务接口
 import service.impl.AddressServiceImpl; // 导入地址服务实现类
@@ -46,17 +47,19 @@ public class AddAddressServlet extends HttpServlet {
             boolean success = addressService.addAddress(address);
             String redirect = req.getContextPath() + "/add_address.jsp";
             String m = success ? "添加成功" : "添加失败";
-            String json = "{" +
-                    "\"success\":" + (success ? "true" : "false") + "," +
-                    "\"message\":\"" + m + "\"," +
-                    "\"redirect\":\"" + redirect + "\"" +
-                    "}";
-            resp.getWriter().write(json);
+            JSONObject obj = new JSONObject();
+            obj.put("success", success);
+            obj.put("message", m);
+            obj.put("redirect", redirect);
+            resp.getWriter().write(JSON.toJSONString(obj));
         } catch (Exception e) {
             e.printStackTrace();
-            String m = e.getMessage() == null ? "" : e.getMessage().replace("\\","\\\\").replace("\"","\\\"");
-            String json = "{\"success\":false,\"message\":\"系统错误：" + m + "\",\"redirect\":\"" + (req.getContextPath()+"/add_address.jsp") + "\"}";
-            resp.getWriter().write(json);
+            String m = e.getMessage() == null ? "" : e.getMessage();
+            JSONObject obj = new JSONObject();
+            obj.put("success", false);
+            obj.put("message", "系统错误：" + m);
+            obj.put("redirect", req.getContextPath()+"/add_address.jsp");
+            resp.getWriter().write(JSON.toJSONString(obj));
         }
     }
 }

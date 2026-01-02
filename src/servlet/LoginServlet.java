@@ -1,5 +1,7 @@
 package servlet;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import service.UserService;
 import service.impl.UserServiceImpl;
 import javax.servlet.ServletException;
@@ -18,14 +20,12 @@ public class LoginServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8"); // 设置编码
         resp.setContentType("application/json;charset=UTF-8"); // 设置内容类型及编码
         String r = redirect == null ? "" : redirect; // 重定向地址
-        // 创建 JSON 字符串 转义符号，避免冲突
-        String m = message == null ? "" : message.replace("\\", "\\\\").replace("\"", "\\\"");
-        String json = "{" +
-                "\"success\":" + (success ? "true" : "false") + "," +
-                "\"message\":\"" + m + "\"," +
-                "\"redirect\":\"" + r + "\"" +
-                "}"; // 创建 JSON 字符串
-        resp.getWriter().write(json); // 写入 JSON
+        String m = message == null ? "" : message;
+        JSONObject obj = new JSONObject();
+        obj.put("success", success);
+        obj.put("message", m);
+        obj.put("redirect", r);
+        resp.getWriter().write(JSON.toJSONString(obj));
     }
 
     // 处理 GET 请求，显示登录页面

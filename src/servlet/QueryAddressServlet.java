@@ -1,5 +1,8 @@
 package servlet;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import pojo.Address;
 import service.AddressService;
 import service.impl.AddressServiceImpl;
@@ -57,40 +60,36 @@ public class QueryAddressServlet extends HttpServlet {
             // 查询
             List<Address> list = addressService.searchAddresses(id, contact, page, pageSize);
 
-            StringBuilder sb = new StringBuilder();
-            sb.append("{\"success\":true,");
-            sb.append("\"message\":\"\",");
-            sb.append("\"page\":").append(page).append(",");
-            sb.append("\"pageSize\":").append(pageSize).append(",");
-            sb.append("\"total\":").append(total).append(",");
-            sb.append("\"maxPage\":").append(maxPage).append(",");
-            sb.append("\"list\":[");
-            for (int i = 0; i < list.size(); i++) {
-                Address a = list.get(i);
-                String contactVal = a.getContact() == null ? "" : a.getContact().replace("\\","\\\\").replace("\"","\\\"");
-                String addrDesc = a.getAddressDesc() == null ? "" : a.getAddressDesc().replace("\\","\\\\").replace("\"","\\\"");
-                String postCode = a.getPostCode() == null ? "" : a.getPostCode().replace("\\","\\\\").replace("\"","\\\"");
-                String tel = a.getTel() == null ? "" : a.getTel().replace("\\","\\\\").replace("\"","\\\"");
-                String creation = a.getCreationDate() == null ? "" : a.getCreationDate().toString().replace("\"","\\\"");
-                sb.append("{")
-                  .append("\"id\":").append(a.getId()).append(",")
-                  .append("\"contact\":\"").append(contactVal).append("\",")
-                  .append("\"addressDesc\":\"").append(addrDesc).append("\",")
-                  .append("\"postCode\":\"").append(postCode).append("\",")
-                  .append("\"tel\":\"").append(tel).append("\",")
-                  .append("\"userId\":").append(a.getUserId()==null?0:a.getUserId()).append(",")
-                  .append("\"createdBy\":").append(a.getCreatedBy()==null?0:a.getCreatedBy()).append(",")
-                  .append("\"creationDate\":\"").append(creation).append("\"")
-                  .append("}");
-                if (i < list.size() - 1) sb.append(",");
+            JSONObject root = new JSONObject();
+            root.put("success", true);
+            root.put("message", "");
+            root.put("page", page);
+            root.put("pageSize", pageSize);
+            root.put("total", total);
+            root.put("maxPage", maxPage);
+            JSONArray arr = new JSONArray();
+            for (Address a : list) {
+                JSONObject item = new JSONObject();
+                item.put("id", a.getId());
+                item.put("contact", a.getContact() == null ? "" : a.getContact());
+                item.put("addressDesc", a.getAddressDesc() == null ? "" : a.getAddressDesc());
+                item.put("postCode", a.getPostCode() == null ? "" : a.getPostCode());
+                item.put("tel", a.getTel() == null ? "" : a.getTel());
+                item.put("userId", a.getUserId() == null ? 0 : a.getUserId());
+                item.put("createdBy", a.getCreatedBy() == null ? 0 : a.getCreatedBy());
+                item.put("creationDate", a.getCreationDate() == null ? "" : a.getCreationDate().toString());
+                arr.add(item);
             }
-            sb.append("]}");
-            resp.getWriter().write(sb.toString());
+            root.put("list", arr);
+            resp.getWriter().write(JSON.toJSONString(root));
         } catch (Exception e) {
             e.printStackTrace();
-            String m = e.getMessage() == null ? "" : e.getMessage().replace("\\","\\\\").replace("\"","\\\"");
-            String json = "{\"success\":false,\"message\":\"查询失败：" + m + "\",\"redirect\":\"\"}";
-            resp.getWriter().write(json);
+            String m = e.getMessage() == null ? "" : e.getMessage();
+            JSONObject obj = new JSONObject();
+            obj.put("success", false);
+            obj.put("message", "查询失败：" + m);
+            obj.put("redirect", "");
+            resp.getWriter().write(JSON.toJSONString(obj));
         }
     }
 }

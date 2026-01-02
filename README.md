@@ -34,7 +34,9 @@
   - 公共封装：`src/dao/BaseDao.java`、`src/dao/DBUtil.java`
 - 配置
   - `web/WEB-INF/web.xml` 设置欢迎页为 `index.jsp`
-  - 依赖 Jar 位于 `web/WEB-INF/lib/`
+  - 依赖 Jar 位于 `web/WEB-INF/lib/` （javax.servlet-api-4.0.1.jar mysql-connector-j-9.3.0.jar）
+  - 新增 JSON 库：fastjson2（com.alibaba.fastjson2），用于服务端 JSON 构建与序列化
+  - 将 fastjson2 JAR 放入 `web/WEB-INF/lib/`（2.0.60 链接直接下载： https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.60/fastjson2-2.0.60.jar ）
 
 **接口约定**
 
@@ -42,6 +44,7 @@
   - `success`：布尔值，表示请求是否成功
   - `message`：字符串，提示信息
   - `redirect`：字符串，非空时前端应导航到该地址
+- 后端 JSON 构建统一使用 fastjson2 的 `JSONObject/JSONArray` 并通过 `JSON.toJSONString(...)` 输出，不再使用字符串拼接
 - 未登录行为：
   - 页面资源（JSP）：重定向到登录页
   - API 请求：返回 `{ success:false, message:"未登录", redirect:"/login.jsp" }`
@@ -70,18 +73,18 @@
   - 注销：删除 `currentUser` 并返回 `redirect` 到首页
   - 地址新增/修改/删除：返回操作结果与消息，必要时返回 `redirect`
   - 地址查询：返回分页信息与列表数组
-- 统一的 JSON 写出逻辑在各 Servlet 内部的 `writeJson(...)` 方法中使用（避免转义问题）
+- 统一的 JSON 写出逻辑在各 Servlet 内部的 `writeJson(...)` 方法中使用，基于 fastjson2 的 `JSONObject/JSONArray` 与 `JSON.toJSONString(...)`
 
 **关键流程与代码参考**
 
 - 登录：`src/servlet/LoginServlet.java:16-29` 写出 JSON；`src/servlet/LoginServlet.java:41-63` 处理登录与会话
 - 注册：`src/servlet/RegisterServlet.java:16-28` 写出 JSON；`src/servlet/RegisterServlet.java:38-65` 处理注册与会话
-- 注销：`src/servlet/LogoutServlet.java:12-23` 写出 JSON；`src/servlet/LogoutServlet.java:27-37` 处理注销并返回重定向 JSON
-- 查询地址：`src/servlet/QueryAddressServlet.java:22-95` 解析条件与分页、返回列表 JSON
+- 注销：`src/servlet/LogoutServlet.java:12-24` 写出 JSON；`src/servlet/LogoutServlet.java:27-37` 处理注销并返回重定向 JSON
+- 查询地址：`src/servlet/QueryAddressServlet.java:22-96` 解析条件与分页、返回列表 JSON
 - 新增地址：`src/servlet/AddAddressServlet.java:31-60` 解析参数、返回结果 JSON
-- 修改地址：`src/servlet/UpdateAddressServlet.java:31-49` 加载编辑页；`src/servlet/UpdateAddressServlet.java:52-77` 处理更新并返回 JSON
-- 删除地址：`src/servlet/DeleteAddressServlet.java:20-35` 根据 `id` 删除并返回 JSON
-- 鉴权拦截：`src/filter/AuthFilter.java:39-47` 未登录时区分页面与 API 的处理
+- 修改地址：`src/servlet/UpdateAddressServlet.java:34-53` 加载编辑页；`src/servlet/UpdateAddressServlet.java:56-82` 处理更新并返回 JSON
+- 删除地址：`src/servlet/DeleteAddressServlet.java:20-37` 根据 `id` 删除并返回 JSON
+- 鉴权拦截：`src/filter/AuthFilter.java:44-47` 未登录时区分页面与 API 的处理
 - 在线人数：`src/listener/OnlineUserCounter.java:12-58` 基于 `currentUser` 属性增删与会话销毁进行计数
 
 **页面导航与状态**
@@ -94,7 +97,8 @@
 
 **运行说明**
 
-- 将项目部署到 Servlet 容器（如 Tomcat），确保 `web/WEB-INF/lib/` 中的依赖（`javax.servlet-api`、`mysql-connector`）可用
+- 将项目部署到 Servlet 容器（如 Tomcat），确保 `web/WEB-INF/lib/` 中的依赖（`javax.servlet-api`、`mysql-connector`、`fastjson2`）可用
+- 如非 Maven 项目，请手工下载 fastjson2 JAR 并放置到 `web/WEB-INF/lib/`：示例版本 2.0.60（https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.60/fastjson2-2.0.60.jar）
 - 数据源配置位于 `src/dao/DBUtil.java` 与 `db.properties`（如存在）
 - 欢迎页为 `index.jsp`
 

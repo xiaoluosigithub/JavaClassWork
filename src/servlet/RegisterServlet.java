@@ -1,5 +1,7 @@
 package servlet;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import service.UserService;
 import service.impl.UserServiceImpl;
 import javax.servlet.*;
@@ -18,13 +20,12 @@ public class RegisterServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json;charset=UTF-8");
         String r = redirect == null ? "" : redirect;
-        String m = message == null ? "" : message.replace("\\", "\\\\").replace("\"", "\\\"");
-        String json = "{" +
-                "\"success\":" + (success ? "true" : "false") + "," +
-                "\"message\":\"" + m + "\"," +
-                "\"redirect\":\"" + r + "\"" +
-                "}";
-        resp.getWriter().write(json);
+        String m = message == null ? "" : message;
+        JSONObject obj = new JSONObject();
+        obj.put("success", success);
+        obj.put("message", m);
+        obj.put("redirect", r);
+        resp.getWriter().write(JSON.toJSONString(obj));
     }
     
     // 处理 GET 请求，展示注册表单页

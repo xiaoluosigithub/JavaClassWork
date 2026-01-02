@@ -1,5 +1,7 @@
 package servlet;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import pojo.Address;
 import service.AddressService;
 import service.impl.AddressServiceImpl;
@@ -19,16 +21,13 @@ public class UpdateAddressServlet extends HttpServlet {
     private void writeJson(HttpServletResponse resp, boolean success, String message, String redirect) throws IOException {
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json;charset=UTF-8");
-        // 构建 JSON 字符串，包含成功状态、消息和可选重定向路径
         String r = redirect == null ? "" : redirect;
-        // 对消息中的特殊字符进行转义，防止 JSON 解析错误
-        String m = message == null ? "" : message.replace("\\", "\\\\").replace("\"", "\\\"");
-        String json = "{" +
-                "\"success\":" + (success ? "true" : "false") + "," +
-                "\"message\":\"" + m + "\"," +
-                "\"redirect\":\"" + r + "\"" +
-                "}";
-        resp.getWriter().write(json);
+        String m = message == null ? "" : message;
+        JSONObject obj = new JSONObject();
+        obj.put("success", success);
+        obj.put("message", m);
+        obj.put("redirect", r);
+        resp.getWriter().write(JSON.toJSONString(obj));
     }
 
     // 处理 GET 请求，根据 ID 查询地址详情并转发到编辑页面
@@ -76,7 +75,7 @@ public class UpdateAddressServlet extends HttpServlet {
             writeJson(resp, ok, m, ok ? redirect : "");
         } catch (Exception e) {
             e.printStackTrace();
-            String m = e.getMessage() == null ? "" : e.getMessage().replace("\\","\\\\").replace("\"","\\\"");
+            String m = e.getMessage() == null ? "" : e.getMessage();
             writeJson(resp, false, "系统错误：" + m, "");
         }
     }

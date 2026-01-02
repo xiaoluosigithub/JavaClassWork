@@ -1,5 +1,7 @@
 package filter;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
@@ -42,8 +44,11 @@ public class AuthFilter implements Filter {
                 response.sendRedirect(request.getContextPath() + "/login.jsp");
             } else {
                 response.setContentType("application/json;charset=UTF-8");
-                String json = "{\"success\":false,\"message\":\"未登录\",\"redirect\":\"" + (request.getContextPath() + "/login.jsp") + "\"}";
-                response.getWriter().write(json);
+                JSONObject obj = new JSONObject();
+                obj.put("success", false);
+                obj.put("message", "未登录");
+                obj.put("redirect", request.getContextPath() + "/login.jsp");
+                response.getWriter().write(JSON.toJSONString(obj));
             }
             return;
         }
